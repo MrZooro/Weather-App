@@ -30,22 +30,24 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
                 response: Response<CurrentWeather>
             ) {
                 if(response.isSuccessful) {
-                    response.body()?.let { sendCurrentWeather(it) }
+                    response.body()?.let { sendCurrentWeather(it, 200) }
                     Log.i("OK", "CurrentWeather: getCurrentWeather")
                 } else {
-                    Log.e("Error", "CurrentWeather: Something went wrong: " + response.code())
+                    Log.w("Warning", "CurrentWeather: Something went wrong: " + response.code())
+                    sendCurrentWeather(null, 300)
                 }
             }
 
             override fun onFailure(call: retrofit2.Call<CurrentWeather>, t: Throwable) {
-                Log.e("Error", "CurrentWeather: Something really went wrong: " + t.message)
+                Log.w("Warning", "CurrentWeather: Something really went wrong: " + t.message)
+                sendCurrentWeather(null, 400)
             }
 
         })
     }
 
-    fun sendCurrentWeather(data : CurrentWeather) {
-        MainPresener.setCurrentWeather(data)
+    fun sendCurrentWeather(data : CurrentWeather?, code : Int) {
+        MainPresener.setCurrentWeather(data, code)
     }
 
     fun getForecastWeather(city: String) {
@@ -58,22 +60,24 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
                 response: Response<ForecastWeather>
             ) {
                 if(response.isSuccessful) {
-                    response.body()?.let { sendForecastWeather(it) }
+                    response.body()?.let { sendForecastWeather(it, 200) }
                     Log.i("OK", "ForecastWeather: getForecastWeather")
                 } else {
-                    Log.e("Error", "ForecastWeather: Something went wrong: " + response.code())
+                    Log.w("Warning", "ForecastWeather: Something went wrong: " + response.code())
+                    sendForecastWeather(null, 300)
                 }
             }
 
             override fun onFailure(call: retrofit2.Call<ForecastWeather>, t: Throwable) {
-                Log.e("Error", "ForecastWeather: Something really went wrong: " + t.message)
+                Log.w("Warning", "ForecastWeather: Something really went wrong: " + t.message)
+                sendForecastWeather(null, 400)
             }
 
         })
     }
 
-    fun sendForecastWeather(data : ForecastWeather) {
-        MainPresener.setForecastWeather(data)
+    fun sendForecastWeather(data : ForecastWeather?, code: Int) {
+        MainPresener.setForecastWeather(data, code)
     }
 
 }

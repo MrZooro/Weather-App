@@ -9,13 +9,13 @@ import com.example.weather_app.model.ip_geolocation.ipGeolocation
 import com.example.weather_app.view.UpdateView
 
 class Presenter(view: UpdateView) {
-    private lateinit var currentWeather : CurrentWeather
+    private var currentWeather : CurrentWeather? = null
     private lateinit var weatherAPIService: WeatherAPIService
     private lateinit var GeolocationService: ipGeolocationService
-    private lateinit var geolocation: ipGeolocation
+    private var geolocation: ipGeolocation? = null
     private var viewForUpdate: UpdateView = view
 
-    private lateinit var forecastWeather: ForecastWeather
+    private var forecastWeather: ForecastWeather? = null
 
     fun updateWeather(city : String, apiKey : String) {
         weatherAPIService = WeatherAPIService(this, apiKey)
@@ -24,14 +24,14 @@ class Presenter(view: UpdateView) {
         weatherAPIService.getForecastWeather(city)
     }
 
-    fun setCurrentWeather(NEWcurrentWeather: CurrentWeather){
+    fun setCurrentWeather(NEWcurrentWeather: CurrentWeather?, code : Int){
         currentWeather = NEWcurrentWeather
-        viewForUpdate.UpdateCurrentWeather(currentWeather)
+        viewForUpdate.UpdateCurrentWeather(currentWeather, code)
     }
 
-    fun setForecastWeather(NEWforecastWeather: ForecastWeather) {
+    fun setForecastWeather(NEWforecastWeather: ForecastWeather?, code: Int) {
         forecastWeather = NEWforecastWeather
-        viewForUpdate.UpdateForecastWeather(forecastWeather)
+        viewForUpdate.UpdateForecastWeather(forecastWeather, code)
     }
 
     fun updateGeolocation() {
@@ -39,9 +39,9 @@ class Presenter(view: UpdateView) {
         GeolocationService.getGeolocation()
     }
 
-    fun sendGeolocation(data: ipGeolocation) {
+    fun sendGeolocation(data: ipGeolocation?, code: Int) {
         geolocation = data
-        viewForUpdate.UpdateGeolocation(geolocation)
+        viewForUpdate.UpdateGeolocation(geolocation, code)
     }
 
 

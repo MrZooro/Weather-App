@@ -2,13 +2,20 @@ package com.example.weather_app.view
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
+import android.transition.AutoTransition
+import android.transition.TransitionManager
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.view.Window
+import android.view.animation.LinearInterpolator
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.weather_app.BuildConfig
@@ -29,7 +36,8 @@ import java.util.*
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
-class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView {
+class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
+    DialogResult {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var presenter: Presenter
@@ -53,12 +61,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView {
         Places.initialize(applicationContext, BuildConfig.Places_API_KEY, Locale.ENGLISH)
         Places.createClient(this)
 
-        presenter = Presenter(this)
-        presenter.updateGeolocation()
-
         binding.edittextLocation.isFocusable = false
         binding.edittextLocation.setOnClickListener(this)
 
+        presenter = Presenter(this)
+        presenter.updateGeolocation()
     }
 
     @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
@@ -75,6 +82,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView {
         val tempCalendar = date
 
         var forecastIdElem = 0
+
+        val sceneRoot = binding.forTransition as ViewGroup
+        val autoTransition = AutoTransition()
+        autoTransition.duration = 50
+        autoTransition.interpolator = LinearInterpolator()
 
         for(i in 0..3) {
             layer = inflater.inflate(R.layout.small_weather_card, binding.placeForFutureDays, false)
@@ -107,6 +119,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView {
                 SMALLweatherStateImage[tempCurr.weather[0].main]?.let { getDrawable(it) }
             forecastIdElem += 8
 
+            TransitionManager.beginDelayedTransition(sceneRoot, autoTransition)
             binding.placeForFutureDays.addView(layer)
             layoutMargin += defaultMargin
         }
@@ -133,12 +146,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView {
         layer.findViewById<View>(R.id.card_weather_icon).background =
             SMALLweatherStateImage[tempCurr.weather[0].main]?.let { getDrawable(it) }
 
+        TransitionManager.beginDelayedTransition(sceneRoot, autoTransition)
         binding.placeForFutureDays.addView(layer)
 
     }
 
     @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
     private fun changeMainCard() {
+        val sceneRoot = binding.forTransition as ViewGroup
+        val autoTransition = AutoTransition()
+        autoTransition.duration = 50
+        autoTransition.interpolator = LinearInterpolator()
+        TransitionManager.beginDelayedTransition(sceneRoot, autoTransition)
+
         if(city != null) binding.city.text = city?.name
 
         val tempTemperature = ((currentWeather.main.temp - 273.15).roundToInt())
@@ -196,26 +216,82 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView {
         city?.name?.let { presenter.updateWeather(it, BuildConfig.OpenWeatherMap_API_KEY) }
     }
 
-    override fun UpdateCurrentWeather(NEWcurrentWeather: CurrentWeather) {
-        currentWeather = NEWcurrentWeather
-        date = Calendar.getInstance()
+    override fun UpdateCurrentWeather(NEWcurrentWeather: CurrentWeather?, code: Int) {
+        if (NEWcurrentWeather != null) {
+            currentWeather = NEWcurrentWeather
+            date = Calendar.getInstance()
+            getCur = true
 
-        changeMainCard()
+            changeMainCard()
+        } else {
+            startDialog(2, code)
+        }
     }
 
-    override fun UpdateForecastWeather(NEWforecastWeather: ForecastWeather) {
-        forecastWeather = NEWforecastWeather
-        date = Calendar.getInstance()
+    override fun UpdateForecastWeather(NEWforecastWeather: ForecastWeather?, code: Int) {
+        if (NEWforecastWeather != null) {
+            forecastWeather = NEWforecastWeather
+            date = Calendar.getInstance()
+            getFor = true
 
-        binding.placeForFutureDays.removeAllViews()
-        fillScrollView()
+            binding.placeForFutureDays.removeAllViews()
+            fillScrollView()
+        } else {
+            startDialog(3, code)
+        }
     }
 
-    override fun UpdateGeolocation(NEWgeolocation: ipGeolocation) {
-        binding.city.text = NEWgeolocation.city
-        binding.edittextLocation.hint = NEWgeolocation.city + ", " + NEWgeolocation.country
+    override fun UpdateGeolocation(NEWgeolocation: ipGeolocation?, code: Int) {
+        if (NEWgeolocation != null) {
+            binding.city.text = NEWgeolocation.city
+            binding.edittextLocation.hint = NEWgeolocation.city + ", " + NEWgeolocation.country
 
-        presenter.updateWeather(NEWgeolocation.city, BuildConfig.OpenWeatherMap_API_KEY)
+            presenter.updateWeather(NEWgeolocation.city, BuildConfig.OpenWeatherMap_API_KEY)
+        } else {
+            startDialog(1, code)
+        }
+    }
+
+    private var getCur : Boolean = false
+    private var getFor : Boolean = false
+    private  val connectionDialog = FragmentDialog()
+    private fun startDialog(serviceCode : Int, code: Int) {
+
+        when (serviceCode) {
+            1 -> {
+                connectionDialog.show(
+                    supportFragmentManager, "No connection dialog",
+                    code, this
+                )
+            }
+            2 -> {
+                if (getFor) {
+                    connectionDialog.show(
+                        supportFragmentManager, "No connection dialog",
+                        code, this
+                    )
+                } else {
+                    getCur = true
+                }
+            }
+            3 -> {
+                if (getCur) {
+                    connectionDialog.show(
+                        supportFragmentManager, "No connection dialog",
+                        code, this
+                    )
+                } else {
+                    getFor = true
+                }
+            }
+        }
+    }
+
+    override fun DialogResults(code: Int) {
+        getFor = false
+        getCur = false
+
+        presenter.updateGeolocation()
     }
 
     val BIGweatherStateImage = mapOf(
@@ -253,5 +329,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView {
         Pair("Drizzle", R.drawable.ic_small_rain),
         Pair("Thunderstorm", R.drawable.ic_small_thunderstorm)
     )
+
+
+    override fun onStop() {
+        super.onStop()
+        if(connectionDialog.isAdded) {
+            connectionDialog.dismissAllowingStateLoss()
+        }
+    }
 
 }

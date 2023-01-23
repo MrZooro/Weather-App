@@ -25,22 +25,24 @@ class ipGeolocationService(presenter : Presenter) {
         call.enqueue(object : Callback<ipGeolocation> {
             override fun onResponse(call: Call<ipGeolocation>, response: Response<ipGeolocation>) {
                 if (response.isSuccessful) {
-                    response.body()?.let { sendGeolocation(it) }
+                    response.body()?.let { sendGeolocation(it, 200) }
                     Log.i("OK", "Geolocation: getGeolocation")
                 } else {
-                    Log.e("Error", "Geolocation: Something went wrong: " + response.code())
+                    Log.w("Warning", "Geolocation: Something went wrong: " + response.code())
+                    sendGeolocation(null, 300)
                 }
             }
 
             override fun onFailure(call: Call<ipGeolocation>, t: Throwable) {
-                Log.e("Error", "Geolocation: Something really went wrong: " + t.message)
+                Log.w("Warning", "Geolocation: Something really went wrong: " + t.message)
+                sendGeolocation(null, 400)
             }
 
         })
 
     }
 
-    private fun sendGeolocation(data : ipGeolocation) {
-        MainPresenter.sendGeolocation(data)
+    private fun sendGeolocation(data : ipGeolocation?, code : Int) {
+        MainPresenter.sendGeolocation(data, code)
     }
 }
