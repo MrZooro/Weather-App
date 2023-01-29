@@ -2,6 +2,7 @@ package com.example.weather_app.view
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.opengl.Visibility
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.transition.AutoTransition
@@ -66,6 +67,28 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
         presenter = Presenter(this)
         presenter.updateGeolocation()
+
+        binding.backToUserGeolocationButton.setOnClickListener{
+            binding.backToUserGeolocationButton.isClickable = false
+            binding.backToUserGeolocationButton.visibility = View.GONE
+            city = null
+            presenter.updateGeolocation()
+        }
+
+        binding.reloadWeatherButton.setOnClickListener{
+            if(city != null) {
+                val lat = city?.latLng?.latitude
+                val lon = city?.latLng?.longitude
+
+                if(lat != null && lon != null) {
+                    presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
+                } else {
+                    Log.w("Warning", "Places: latitude or longitude is null")
+                }
+            } else {
+                presenter.updateGeolocation()
+            }
+        }
     }
 
     @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
@@ -108,20 +131,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             val tempCurr = forecastWeather.list[forecastIdElem]
             val tempTemperature = ((tempCurr.main.temp - 273.15).roundToInt())
             if(tempTemperature > 0) {
-                layer.findViewById<TextView>(R.id.card_temperature).text = "+$tempTemperature"
+                layer.findViewById<TextView>(R.id.card_temperature).text = "+$tempTemperature°C"
             } else if(tempTemperature < 0) {
-                layer.findViewById<TextView>(R.id.card_temperature).text = tempTemperature.toString()
+                layer.findViewById<TextView>(R.id.card_temperature).text = "$tempTemperature°C"
             } else {
                 layer.findViewById<TextView>(R.id.card_temperature).text = "0"
             }
 
             layer.findViewById<View>(R.id.card_weather_icon).background =
                 SMALLweatherStateImage[tempCurr.weather[0].main]?.let { getDrawable(it) }
-            forecastIdElem += 8
 
             TransitionManager.beginDelayedTransition(sceneRoot, autoTransition)
             binding.placeForFutureDays.addView(layer)
             layoutMargin += defaultMargin
+            forecastIdElem += 8
         }
 
         layer = inflater.inflate(R.layout.small_weather_card, binding.placeForFutureDays, false)
@@ -140,8 +163,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         layer.findViewById<TextView>(R.id.card_date).text = dateFormat.format(date.time)
 
         val tempCurr = forecastWeather.list[forecastIdElem]
-        layer.findViewById<TextView>(R.id.card_temperature).text =
-            ((tempCurr.main.temp - 273.15).roundToInt()).toString()
+        val tempTemperature = ((tempCurr.main.temp - 273.15).roundToInt())
+        if(tempTemperature > 0) {
+            layer.findViewById<TextView>(R.id.card_temperature).text = "+$tempTemperature°C"
+        } else if(tempTemperature < 0) {
+            layer.findViewById<TextView>(R.id.card_temperature).text = "$tempTemperature°C"
+        } else {
+            layer.findViewById<TextView>(R.id.card_temperature).text = "0"
+        }
 
         layer.findViewById<View>(R.id.card_weather_icon).background =
             SMALLweatherStateImage[tempCurr.weather[0].main]?.let { getDrawable(it) }
@@ -163,9 +192,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
         val tempTemperature = ((currentWeather.main.temp - 273.15).roundToInt())
         if(tempTemperature > 0) {
-            binding.currentTemperature.text = "+$tempTemperature"
+            binding.currentTemperature.text = "+$tempTemperature°C"
         } else if(tempTemperature < 0) {
-            binding.currentTemperature.text = tempTemperature.toString()
+            binding.currentTemperature.text = "$tempTemperature°C"
         } else {
             binding.currentTemperature.text = "0"
         }
@@ -181,8 +210,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     }
 
     override fun onClick(v: View?) {
-
-        val fields = listOf(Place.Field.NAME, Place.Field.ADDRESS)
+        val fields = listOf(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG)
 
         val intent = application?.let {
             Autocomplete.IntentBuilder(
@@ -190,7 +218,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
                 .setTypesFilter(Arrays.asList(PlaceTypes.CITIES))
                 .build(it)
         }
-        startActivityForResult(intent, 300)
+        if (intent != null) {
+            startActivityForResult(intent, 300)
+        }
     }
 
     @Override
@@ -200,12 +230,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             if (resultCode == RESULT_OK) {
                 val place = Autocomplete.getPlaceFromIntent(data!!)
                 city = place
-                place.name?.let { Log.i("Hmm", it) }
+                Log.i("OK", "Places: ${place.name}")
+
                 changeCity()
+
+                binding.backToUserGeolocationButton.isClickable = true
+                binding.backToUserGeolocationButton.visibility = View.VISIBLE
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                Log.i("Error", "Error")
+                Log.w("Error:", "Places: Something went wrong")
             } else if (resultCode == AutocompleteActivity.RESULT_CANCELED) {
-                Log.i("Error", "Error: Cancel")
+                Log.w("Error:", "Places: Cancel")
             }
         }
     }
@@ -213,7 +247,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     private fun changeCity() {
         binding.edittextLocation.hint = city?.address
 
-        city?.name?.let { presenter.updateWeather(it, BuildConfig.OpenWeatherMap_API_KEY) }
+        val lat = city?.latLng?.latitude
+        val lon = city?.latLng?.longitude
+
+        if (lon != null && lat != null) {
+            presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
+        } else {
+            Log.w("Warning", "Places: latitude or longitude is null")
+        }
+
     }
 
     override fun UpdateCurrentWeather(NEWcurrentWeather: CurrentWeather?, code: Int) {
@@ -246,7 +288,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             binding.city.text = NEWgeolocation.city
             binding.edittextLocation.hint = NEWgeolocation.city + ", " + NEWgeolocation.country
 
-            presenter.updateWeather(NEWgeolocation.city, BuildConfig.OpenWeatherMap_API_KEY)
+            presenter.updateWeather(NEWgeolocation.lat, NEWgeolocation.lon, BuildConfig.OpenWeatherMap_API_KEY)
         } else {
             startDialog(1, code)
         }

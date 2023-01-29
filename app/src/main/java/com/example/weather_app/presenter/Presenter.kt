@@ -17,11 +17,11 @@ class Presenter(view: UpdateView) {
 
     private var forecastWeather: ForecastWeather? = null
 
-    fun updateWeather(city : String, apiKey : String) {
+    fun updateWeather(lat : Double, lon : Double, apiKey : String) {
         weatherAPIService = WeatherAPIService(this, apiKey)
 
-        weatherAPIService.getCurrentWeather(city)
-        weatherAPIService.getForecastWeather(city)
+        weatherAPIService.getCurrentWeather(lat, lon)
+        weatherAPIService.getForecastWeather(lat, lon)
     }
 
     fun setCurrentWeather(NEWcurrentWeather: CurrentWeather?, code : Int){

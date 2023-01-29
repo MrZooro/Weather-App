@@ -10,8 +10,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class WeatherAPIService(presenter: Presenter, apiKey : String) {
-    private var URLcurWeather : String = "https://api.openweathermap.org/data/2.5/weather?q="
-    private var URLforWeather : String = "https://api.openweathermap.org/data/2.5/forecast?q="
+    private var URLcurWeather : String = "https://api.openweathermap.org/data/2.5/weather?"
+    private var URLforWeather : String = "https://api.openweathermap.org/data/2.5/forecast?"
     private val MainApiKey : String = apiKey
     private val MainPresener = presenter
     private val retrofit = Retrofit.Builder()
@@ -20,8 +20,9 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
         .build()
         .create(WeatherAPI::class.java)
 
-    fun getCurrentWeather(city : String) {
-        URLcurWeather = "$URLcurWeather$city&appid=$MainApiKey"
+    fun getCurrentWeather(lat : Double, lon : Double) {
+        URLcurWeather = "${URLcurWeather}lat=$lat&lon=$lon&appid=$MainApiKey"
+
 
         val call = retrofit.getDataCurrentWeather(URLcurWeather)
         call.enqueue(object : Callback<CurrentWeather>{
@@ -50,8 +51,8 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
         MainPresener.setCurrentWeather(data, code)
     }
 
-    fun getForecastWeather(city: String) {
-        URLforWeather = "$URLforWeather$city&appid=$MainApiKey"
+    fun getForecastWeather(lat: Double, lon: Double) {
+        URLforWeather = "${URLforWeather}lat=$lat&lon=$lon&appid=$MainApiKey"
 
         val call = retrofit.getDataForecastWeather(URLforWeather)
         call.enqueue(object : Callback<ForecastWeather>{

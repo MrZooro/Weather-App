@@ -11,4 +11,5 @@
     <color name="grey_200">#E9E9E9</color>
     <color name="clear_day">#42C2FF</color>
     <color name="text_color">#E8FCFF</color>
+    <color name="geolocation_button_color">#A1DDFA</color>
 </resources>
