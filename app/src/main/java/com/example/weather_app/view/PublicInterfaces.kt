@@ -5,8 +5,8 @@ import com.example.weather_app.model.forecast_weather.ForecastWeather
 import com.example.weather_app.model.ip_geolocation.ipGeolocation
 
 interface UpdateView {
-    fun UpdateCurrentWeather(NEWcurrentWeather: CurrentWeather?, code : Int)
-    fun UpdateForecastWeather(NEWforecastWeather: ForecastWeather?, code : Int)
+    fun UpdateCurrentWeather(code : Int)
+    fun UpdateForecastWeather(code : Int)
     fun UpdateGeolocation(NEWgeolocation : ipGeolocation?, code: Int)
 }
 

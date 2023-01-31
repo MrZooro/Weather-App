@@ -2,18 +2,14 @@ package com.example.weather_app.view
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.opengl.Visibility
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.animation.LinearInterpolator
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -23,7 +19,6 @@ import com.example.weather_app.BuildConfig
 import com.example.weather_app.R
 import com.example.weather_app.databinding.ActivityMainBinding
 import com.example.weather_app.model.current_weather.CurrentWeather
-import com.example.weather_app.model.forecast_weather.ForecastWeather
 import com.example.weather_app.model.ip_geolocation.ipGeolocation
 import com.example.weather_app.presenter.Presenter
 import com.google.android.libraries.places.api.Places
@@ -42,8 +37,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var presenter: Presenter
-    private lateinit var currentWeather: CurrentWeather
-    private lateinit var forecastWeather: ForecastWeather
 
     private var city : Place? = null
     private lateinit var date : Calendar
@@ -76,11 +69,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         }
 
         binding.reloadWeatherButton.setOnClickListener{
+
+            /*
+            val frag = FragmentWeatherInfo()
+            frag.show(supportFragmentManager, "Something")
+             */
+
             if(city != null) {
                 val lat = city?.latLng?.latitude
                 val lon = city?.latLng?.longitude
 
                 if(lat != null && lon != null) {
+                    getCur = false
+                    getFor = false
                     presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
                 } else {
                     Log.w("Warning", "Places: latitude or longitude is null")
@@ -88,6 +89,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             } else {
                 presenter.updateGeolocation()
             }
+
+
         }
     }
 
@@ -111,12 +114,35 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         autoTransition.duration = 50
         autoTransition.interpolator = LinearInterpolator()
 
-        for(i in 0..3) {
+        val forecastWeatherByDay = presenter.getForecastListWeatherByDay()
+
+        for(element in forecastWeatherByDay) {
+
+            var minTemp = element[0].main.temp_min
+            var maxTemp = element[0].main.temp_max
+            var whatIcon = ""
+            var iconImportance = 0
+
+            for(j in 1 until element.size) {
+                if(element[j].main.temp_min < minTemp) minTemp = element[j].main.temp_min
+
+                if(element[j].main.temp_max > maxTemp) maxTemp = element[j].main.temp_max
+
+                val tempIconImportance = whatMoreImportant[element[j].weather[0].main]
+                if(tempIconImportance != null) {
+                    if(tempIconImportance > iconImportance) {
+                        whatIcon = element[j].weather[0].main
+                        iconImportance = tempIconImportance
+                    }
+                }
+            }
+
             layer = inflater.inflate(R.layout.small_weather_card, binding.placeForFutureDays, false)
 
-            val params : ConstraintLayout.LayoutParams = ConstraintLayout.LayoutParams(
+            val params = ConstraintLayout.LayoutParams(
                 ceil(layoutWidth).toInt(),
-                ceil(layoutHeight).toInt())
+                ceil(layoutHeight).toInt()
+            )
 
             params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
             params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
@@ -125,21 +151,31 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
             tempCalendar.add(Calendar.DATE, 1)
 
+            layer.findViewById<TextView>(R.id.card_date).text = dateFormat.format(tempCalendar.time)
 
-            layer.findViewById<TextView>(R.id.card_date).text = dateFormat.format(date.time)
+            val minTempInt = (minTemp - 273.15).roundToInt()
+            val maxTempInt = (maxTemp - 273.15).roundToInt()
 
-            val tempCurr = forecastWeather.list[forecastIdElem]
-            val tempTemperature = ((tempCurr.main.temp - 273.15).roundToInt())
-            if(tempTemperature > 0) {
-                layer.findViewById<TextView>(R.id.card_temperature).text = "+$tempTemperature°C"
-            } else if(tempTemperature < 0) {
-                layer.findViewById<TextView>(R.id.card_temperature).text = "$tempTemperature°C"
+            var tempStr: String = if (minTempInt < 0) {
+                "$minTempInt .. "
+            } else if (minTempInt > 0){
+                "+$minTempInt .. "
             } else {
-                layer.findViewById<TextView>(R.id.card_temperature).text = "0"
+                "0 .. "
             }
 
+            tempStr += if(maxTempInt < 0) {
+                "$maxTempInt"
+            } else if (maxTempInt > 0) {
+                "+$maxTempInt"
+            } else {
+                "0"
+            }
+
+            layer.findViewById<TextView>(R.id.card_temperature).text = tempStr
+
             layer.findViewById<View>(R.id.card_weather_icon).background =
-                SMALLweatherStateImage[tempCurr.weather[0].main]?.let { getDrawable(it) }
+                SMALLweatherStateImage[whatIcon]?.let { getDrawable(it) }
 
             TransitionManager.beginDelayedTransition(sceneRoot, autoTransition)
             binding.placeForFutureDays.addView(layer)
@@ -147,36 +183,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             forecastIdElem += 8
         }
 
-        layer = inflater.inflate(R.layout.small_weather_card, binding.placeForFutureDays, false)
 
-        val params : ConstraintLayout.LayoutParams = ConstraintLayout.LayoutParams(
-            ceil(layoutWidth).toInt(),
-            ceil(layoutHeight).toInt())
-
-        params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-        params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-        params.marginStart = layoutMargin.toInt()
-        params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-        params.marginEnd = ceil(18 * ds.density).toInt()
-
-        layer.layoutParams = params
-        layer.findViewById<TextView>(R.id.card_date).text = dateFormat.format(date.time)
-
-        val tempCurr = forecastWeather.list[forecastIdElem]
-        val tempTemperature = ((tempCurr.main.temp - 273.15).roundToInt())
-        if(tempTemperature > 0) {
-            layer.findViewById<TextView>(R.id.card_temperature).text = "+$tempTemperature°C"
-        } else if(tempTemperature < 0) {
-            layer.findViewById<TextView>(R.id.card_temperature).text = "$tempTemperature°C"
-        } else {
-            layer.findViewById<TextView>(R.id.card_temperature).text = "0"
-        }
-
-        layer.findViewById<View>(R.id.card_weather_icon).background =
-            SMALLweatherStateImage[tempCurr.weather[0].main]?.let { getDrawable(it) }
-
-        TransitionManager.beginDelayedTransition(sceneRoot, autoTransition)
-        binding.placeForFutureDays.addView(layer)
 
     }
 
@@ -190,21 +197,27 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
         if(city != null) binding.city.text = city?.name
 
-        val tempTemperature = ((currentWeather.main.temp - 273.15).roundToInt())
-        if(tempTemperature > 0) {
-            binding.currentTemperature.text = "+$tempTemperature°C"
-        } else if(tempTemperature < 0) {
-            binding.currentTemperature.text = "$tempTemperature°C"
-        } else {
-            binding.currentTemperature.text = "0"
-        }
+        val currentWeather = presenter.getCurrentWeather()
 
-        binding.currentDate.text = dateFormat.format(date.time)
-        binding.BIGweatherIcon.background =
-            BIGweatherStateImage[currentWeather.weather[0].main]?.let {
-            getDrawable(
-                it
-            )
+        if(currentWeather != null) {
+
+            val tempTemperature = ((currentWeather.main.temp - 273.15).roundToInt())
+            if(tempTemperature > 0) {
+                binding.currentTemperature.text = "+$tempTemperature°C"
+            } else if(tempTemperature < 0) {
+                binding.currentTemperature.text = "$tempTemperature°C"
+            } else {
+                binding.currentTemperature.text = "0"
+            }
+
+            binding.currentDate.text = dateFormat.format(date.time)
+            binding.BIGweatherIcon.background =
+                BIGweatherStateImage[currentWeather.weather[0].main]?.let {
+                getDrawable(
+                    it
+                )
+            }
+
         }
 
     }
@@ -251,6 +264,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         val lon = city?.latLng?.longitude
 
         if (lon != null && lat != null) {
+            getFor = false
+            getCur = false
+
             presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
         } else {
             Log.w("Warning", "Places: latitude or longitude is null")
@@ -258,9 +274,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
     }
 
-    override fun UpdateCurrentWeather(NEWcurrentWeather: CurrentWeather?, code: Int) {
-        if (NEWcurrentWeather != null) {
-            currentWeather = NEWcurrentWeather
+    override fun UpdateCurrentWeather(code: Int) {
+        if (code == 200) {
             date = Calendar.getInstance()
             getCur = true
 
@@ -270,9 +285,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         }
     }
 
-    override fun UpdateForecastWeather(NEWforecastWeather: ForecastWeather?, code: Int) {
-        if (NEWforecastWeather != null) {
-            forecastWeather = NEWforecastWeather
+    override fun UpdateForecastWeather(code: Int) {
+        if (code == 200) {
             date = Calendar.getInstance()
             getFor = true
 
@@ -288,6 +302,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             binding.city.text = NEWgeolocation.city
             binding.edittextLocation.hint = NEWgeolocation.city + ", " + NEWgeolocation.country
 
+            getFor = false
+            getCur = false
+
             presenter.updateWeather(NEWgeolocation.lat, NEWgeolocation.lon, BuildConfig.OpenWeatherMap_API_KEY)
         } else {
             startDialog(1, code)
@@ -299,6 +316,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     private  val connectionDialog = FragmentDialog()
     private fun startDialog(serviceCode : Int, code: Int) {
 
+        println(serviceCode)
         when (serviceCode) {
             1 -> {
                 connectionDialog.show(
@@ -333,7 +351,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         getFor = false
         getCur = false
 
-        presenter.updateGeolocation()
+        if(city != null) {
+            val lat = city?.latLng?.latitude
+            val lon = city?.latLng?.longitude
+
+            if(lat != null && lon != null) {
+                getCur = false
+                getFor = false
+                presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
+            } else {
+                Log.w("Warning", "Places: latitude or longitude is null")
+            }
+        } else {
+            presenter.updateGeolocation()
+        }
     }
 
     val BIGweatherStateImage = mapOf(
@@ -370,6 +401,24 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         Pair("Rain", R.drawable.ic_small_rain),
         Pair("Drizzle", R.drawable.ic_small_rain),
         Pair("Thunderstorm", R.drawable.ic_small_thunderstorm)
+    )
+
+    val whatMoreImportant = mapOf(
+        Pair("Clear", 1),
+        Pair("Clouds", 2),
+        Pair("Mist", 2),
+        Pair("Smoke", 2),
+        Pair("Haze", 2),
+        Pair("Dust", 2),
+        Pair("Fog", 2),
+        Pair("Sand", 2),
+        Pair("Ash", 2),
+        Pair("Squall", 2),
+        Pair("Tornado", 2),
+        Pair("Snow", 3),
+        Pair("Rain", 3),
+        Pair("Drizzle", 3),
+        Pair("Thunderstorm", 4)
     )
 
 
