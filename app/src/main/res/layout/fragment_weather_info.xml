@@ -1,26 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="148dp"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <TextView
+        android:id="@+id/fwi_date_tv"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Monday\n15/11/2022"
+        android:gravity="center"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+
+
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <HorizontalScrollView
+        android:id="@+id/wasteid_weather_cards_scroll_view"
+
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="140dp"
         android:scrollbars="none"
 
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="24dp"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="24dp">
+        app:layout_constraintTop_toBottomOf="@id/fwi_date_tv"
+        android:layout_marginTop="12dp"
+        app:layout_constraintStart_toStartOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:id="@+id/place_for_somthing"/>
+            android:id="@+id/fwi_place_for_big_weather_cards"/>
 
     </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/fwi_atmospheric_pressure_tv"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="Atmospheric pressure: "
+        android:textSize="14dp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+
+        app:layout_constraintTop_toBottomOf="@id/wasteid_weather_cards_scroll_view"
+        android:layout_marginTop="28dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="18dp"/>
+
+    <TextView
+        android:id="@+id/fwi_humidity_tv"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="Humidity: "
+        android:textSize="14dp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+
+        app:layout_constraintTop_toBottomOf="@id/fwi_atmospheric_pressure_tv"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="18dp"/>
+
+    <TextView
+        android:id="@+id/fwi_cloud_cover_tv"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="Cloud cover: "
+        android:textSize="14dp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+
+        app:layout_constraintTop_toBottomOf="@id/fwi_humidity_tv"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="18dp"/>
+
+    <TextView
+        android:id="@+id/fwi_visibility_tv"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="Visibility (max 10 km):  "
+        android:textSize="14dp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+
+        app:layout_constraintTop_toBottomOf="@id/fwi_cloud_cover_tv"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="18dp"/>
+
+    <TextView
+        android:id="@+id/wasteid_wind_speed_tv"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Wind speed:"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+
+        app:layout_constraintTop_toBottomOf="@id/fwi_visibility_tv"
+        android:layout_marginTop="28dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="18dp"/>
+    
+    <HorizontalScrollView
+        android:id="@+id/wasteid_wind_speed_cards_scroll_view"
+
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:scrollbars="none"
+
+        app:layout_constraintTop_toBottomOf="@id/wasteid_wind_speed_tv"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fwi_place_for_wind_speed_cards"
+
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/wasteid_chance_of_rain"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Probability of precipitation:"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+
+        app:layout_constraintTop_toBottomOf="@id/wasteid_wind_speed_cards_scroll_view"
+        android:layout_marginTop="28dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="18dp"/>
+
+    <HorizontalScrollView
+
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:scrollbars="none"
+
+        app:layout_constraintTop_toBottomOf="@id/wasteid_chance_of_rain"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fwi_place_for_chance_of_rain_cards"
+
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+
+    </HorizontalScrollView>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -27,6 +28,7 @@ import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.ceil
@@ -41,7 +43,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     private var city : Place? = null
     private lateinit var date : Calendar
 
-    private val dateFormat : SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+    private val dateFormat : SimpleDateFormat = SimpleDateFormat("EEEE\ndd/MM/yyyy", Locale.US)
+
+    var startBSDF = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,14 +104,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         val inflater : LayoutInflater = layoutInflater
 
         val ds : DisplayMetrics = resources.displayMetrics
-        val layoutHeight = 100 * ds.density
-        val layoutWidth = 64 * ds.density
-        val defaultMargin = 72 * ds.density
+        val layoutHeight = 116 * ds.density
+        val layoutWidth = 80 * ds.density
+        val defaultMargin = 88 * ds.density
         var layoutMargin = 18 * ds.density
 
         val tempCalendar = date
-
-        var forecastIdElem = 0
 
         val sceneRoot = binding.forTransition as ViewGroup
         val autoTransition = AutoTransition()
@@ -116,8 +118,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
         val forecastWeatherByDay = presenter.getForecastListWeatherByDay()
 
-        for(element in forecastWeatherByDay) {
+        for(i in forecastWeatherByDay.indices) {
 
+            val element = forecastWeatherByDay[i]
             var minTemp = element[0].main.temp_min
             var maxTemp = element[0].main.temp_max
             var whatIcon = ""
@@ -146,7 +149,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
             params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
             params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            params.marginStart = layoutMargin.toInt()
+            params.marginStart = ceil(layoutMargin).toInt()
+            if(i == forecastWeatherByDay.size-1) {
+                params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+                params.marginEnd = ceil(18 * ds.density).toInt()
+            }
+
             layer.layoutParams = params
 
             tempCalendar.add(Calendar.DATE, 1)
@@ -178,9 +186,30 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
                 SMALLweatherStateImage[whatIcon]?.let { getDrawable(it) }
 
             TransitionManager.beginDelayedTransition(sceneRoot, autoTransition)
+
+            layer.findViewById<Button>(R.id.small_weather_card).setOnClickListener{
+                if(startBSDF) {
+                    return@setOnClickListener
+                }
+                startBSDF = true
+
+                val par : ViewGroup = it.parent as ViewGroup
+                val tempDateStr = par.findViewById<TextView>(R.id.card_date).text.toString()
+                val dateList = tempDateStr.split("\n")[1].split("/")
+
+                val weatherList = presenter.getListByDay(dateList[0], dateList[1], dateList[2])
+
+                if(weatherList != null) {
+                    val frag = FragmentWeatherInfo(weatherList, null, this)
+                    frag.show(supportFragmentManager, "Something")
+                } else {
+                    Log.e("Error", "MainActivity: cannot find weather list")
+                }
+            }
+
+
             binding.placeForFutureDays.addView(layer)
             layoutMargin += defaultMargin
-            forecastIdElem += 8
         }
 
 
@@ -216,6 +245,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
                 getDrawable(
                     it
                 )
+            }
+
+            binding.currentWeatherInformationBackground.setOnClickListener {
+                val dateList = binding.currentDate.text.split("\n")[1]
+                    .split("/")
+                val weatherList = presenter.getListByDay(dateList[0], dateList[1], dateList[2])
+
+                if(weatherList != null) {
+                    val frag = FragmentWeatherInfo(weatherList, currentWeather, this)
+                    frag.show(supportFragmentManager, "Something")
+                } else Log.e("Error", "MainActivity: cannot find weather list")
             }
 
         }
