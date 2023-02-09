@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
     var startBSDF = false
 
+    private var isRefreshing = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -62,23 +64,24 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         binding.edittextLocation.isFocusable = false
         binding.edittextLocation.setOnClickListener(this)
 
+
         presenter = Presenter(this)
+        binding.refreshLayout.isRefreshing = true
+        isRefreshing = true
         presenter.updateGeolocation()
 
         binding.backToUserGeolocationButton.setOnClickListener{
             binding.backToUserGeolocationButton.isClickable = false
             binding.backToUserGeolocationButton.visibility = View.GONE
             city = null
+
+            binding.refreshLayout.isRefreshing = true
+            isRefreshing = true
+
             presenter.updateGeolocation()
         }
 
-        binding.reloadWeatherButton.setOnClickListener{
-
-            /*
-            val frag = FragmentWeatherInfo()
-            frag.show(supportFragmentManager, "Something")
-             */
-
+        binding.refreshLayout.setOnRefreshListener {
             if(city != null) {
                 val lat = city?.latLng?.latitude
                 val lon = city?.latLng?.longitude
@@ -86,11 +89,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
                 if(lat != null && lon != null) {
                     getCur = false
                     getFor = false
+                    isRefreshing = true
                     presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
                 } else {
                     Log.w("Warning", "Places: latitude or longitude is null")
                 }
             } else {
+                isRefreshing = true
                 presenter.updateGeolocation()
             }
 
@@ -307,6 +312,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             getFor = false
             getCur = false
 
+            binding.refreshLayout.isRefreshing = true
+            isRefreshing = true
+
             presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
         } else {
             Log.w("Warning", "Places: latitude or longitude is null")
@@ -315,6 +323,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     }
 
     override fun UpdateCurrentWeather(code: Int) {
+        if(isRefreshing) {
+            isRefreshing = false
+            binding.refreshLayout.isRefreshing = false
+        }
+
         if (code == 200) {
             date = Calendar.getInstance()
             getCur = true
@@ -326,6 +339,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     }
 
     override fun UpdateForecastWeather(code: Int) {
+        if(isRefreshing) {
+            isRefreshing = false
+            binding.refreshLayout.isRefreshing = false
+        }
+
         if (code == 200) {
             date = Calendar.getInstance()
             getFor = true
@@ -338,6 +356,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     }
 
     override fun UpdateGeolocation(NEWgeolocation: ipGeolocation?, code: Int) {
+        if(isRefreshing) {
+            isRefreshing = false
+            binding.refreshLayout.isRefreshing = false
+        }
+
         if (NEWgeolocation != null) {
             binding.city.text = NEWgeolocation.city
             binding.edittextLocation.hint = NEWgeolocation.city + ", " + NEWgeolocation.country
@@ -398,11 +421,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             if(lat != null && lon != null) {
                 getCur = false
                 getFor = false
+
+                binding.refreshLayout.isRefreshing = true
+                isRefreshing = true
+
                 presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
             } else {
                 Log.w("Warning", "Places: latitude or longitude is null")
             }
         } else {
+            binding.refreshLayout.isRefreshing = true
+            isRefreshing = true
+
             presenter.updateGeolocation()
         }
     }
