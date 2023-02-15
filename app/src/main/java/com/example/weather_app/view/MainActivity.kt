@@ -2,6 +2,7 @@ package com.example.weather_app.view
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.transition.AutoTransition
 import android.transition.TransitionManager
@@ -17,10 +18,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.example.weather_app.BuildConfig
 import com.example.weather_app.R
 import com.example.weather_app.databinding.ActivityMainBinding
 import com.example.weather_app.model.current_weather.CurrentWeather
+import com.example.weather_app.model.forecast_weather.ForecastWeatherItem
 import com.example.weather_app.model.ip_geolocation.ipGeolocation
 import com.example.weather_app.presenter.Presenter
 import com.google.android.libraries.places.api.Places
@@ -56,7 +59,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        //window.statusBarColor = ContextCompat.getColor(applicationContext, R.color.white)
 
         Places.initialize(applicationContext, BuildConfig.Places_API_KEY, Locale.ENGLISH)
         Places.createClient(this)
@@ -116,6 +118,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
         val tempCalendar = date
 
+
         val sceneRoot = binding.forTransition as ViewGroup
         val autoTransition = AutoTransition()
         autoTransition.duration = 50
@@ -123,13 +126,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
         val forecastWeatherByDay = presenter.getForecastListWeatherByDay()
 
+        var element : List<ForecastWeatherItem>
+        var minTemp : Double
+        var maxTemp : Double
+        var iconImportance : Int
+        var whatWeatherDescription = ""
+        var tempTextColor : Int?
+        var tempCardColor : Int?
+
         for(i in forecastWeatherByDay.indices) {
 
-            val element = forecastWeatherByDay[i]
-            var minTemp = element[0].main.temp_min
-            var maxTemp = element[0].main.temp_max
-            var whatIcon = ""
-            var iconImportance = 0
+            element = forecastWeatherByDay[i]
+            minTemp = element[0].main.temp_min
+            maxTemp = element[0].main.temp_max
+            iconImportance = 0
 
             for(j in 1 until element.size) {
                 if(element[j].main.temp_min < minTemp) minTemp = element[j].main.temp_min
@@ -139,7 +149,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
                 val tempIconImportance = whatMoreImportant[element[j].weather[0].main]
                 if(tempIconImportance != null) {
                     if(tempIconImportance > iconImportance) {
-                        whatIcon = element[j].weather[0].main
+                        whatWeatherDescription = element[j].weather[0].main
                         iconImportance = tempIconImportance
                     }
                 }
@@ -188,7 +198,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             layer.findViewById<TextView>(R.id.card_temperature).text = tempStr
 
             layer.findViewById<View>(R.id.card_weather_icon).background =
-                SMALLweatherStateImage[whatIcon]?.let { getDrawable(it) }
+                SMALLweatherStateImage[whatWeatherDescription]?.let { getDrawable(it) }
+
+            tempTextColor = textColor[whatWeatherDescription]
+            if(tempTextColor != null) {
+                layer.findViewById<TextView>(R.id.card_temperature).setTextColor(ContextCompat.getColor(this, tempTextColor))
+                layer.findViewById<TextView>(R.id.card_date).setTextColor(ContextCompat.getColor(this, tempTextColor))
+            }
+
+            tempCardColor = cardColor[whatWeatherDescription]
+            if(tempCardColor != null) {
+                layer.findViewById<Button>(R.id.small_weather_card).backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this, tempCardColor))
+            }
 
             TransitionManager.beginDelayedTransition(sceneRoot, autoTransition)
 
@@ -234,6 +256,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         val currentWeather = presenter.getCurrentWeather()
 
         if(currentWeather != null) {
+            val tempTextColor = textColor[currentWeather.weather[0].main]
+            if(tempTextColor != null) {
+                binding.city.setTextColor(ContextCompat.getColor(this, tempTextColor))
+                binding.currentTemperature.setTextColor(ContextCompat.getColor(this, tempTextColor))
+                binding.currentDate.setTextColor(ContextCompat.getColor(this, tempTextColor))
+            }
+            val tempCardColor = cardColor[currentWeather.weather[0].main]
+            if(tempCardColor != null) {
+                binding.currentWeatherInformationBackground.backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this, tempCardColor))
+                window.statusBarColor = ContextCompat.getColor(applicationContext, tempCardColor)
+            }
 
             val tempTemperature = ((currentWeather.main.temp - 273.15).roundToInt())
             if(tempTemperature > 0) {
@@ -471,6 +505,42 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         Pair("Rain", R.drawable.ic_small_rain),
         Pair("Drizzle", R.drawable.ic_small_rain),
         Pair("Thunderstorm", R.drawable.ic_small_thunderstorm)
+    )
+
+    val textColor = mapOf(
+        Pair("Clear", R.color.text_clear_day),
+        Pair("Clouds", R.color.text_clouds),
+        Pair("Mist", R.color.text_clouds),
+        Pair("Smoke", R.color.text_clouds),
+        Pair("Haze", R.color.text_clouds),
+        Pair("Dust", R.color.text_clouds),
+        Pair("Fog", R.color.text_clouds),
+        Pair("Sand", R.color.text_clouds),
+        Pair("Ash", R.color.text_clouds),
+        Pair("Squall", R.color.text_clouds),
+        Pair("Tornado", R.color.text_clouds),
+        Pair("Snow", R.color.text_snow),
+        Pair("Rain", R.color.text_rain),
+        Pair("Drizzle", R.color.text_rain),
+        Pair("Thunderstorm", R.color.text_thunderstorm)
+    )
+
+    val cardColor = mapOf(
+        Pair("Clear", R.color.clear_day),
+        Pair("Clouds", R.color.clouds),
+        Pair("Mist", R.color.clouds),
+        Pair("Smoke", R.color.clouds),
+        Pair("Haze", R.color.clouds),
+        Pair("Dust", R.color.clouds),
+        Pair("Fog", R.color.clouds),
+        Pair("Sand", R.color.clouds),
+        Pair("Ash", R.color.clouds),
+        Pair("Squall", R.color.clouds),
+        Pair("Tornado", R.color.clouds),
+        Pair("Snow", R.color.snow),
+        Pair("Rain", R.color.rain),
+        Pair("Drizzle", R.color.rain),
+        Pair("Thunderstorm", R.color.thunderstorm)
     )
 
     val whatMoreImportant = mapOf(

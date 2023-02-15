@@ -9,7 +9,19 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="grey_200">#E9E9E9</color>
-    <color name="clear_day">#42C2FF</color>
     <color name="text_color">#E8FCFF</color>
     <color name="geolocation_button_color">#A1DDFA</color>
+
+    <color name="clear_day">#42C2FF</color>
+    <color name="clouds">#A1ACB3</color>
+    <color name="rain">#7795A8</color>
+    <color name="snow">#CCCCCC</color>
+    <color name="thunderstorm">#536875</color>
+
+    <color name="text_clear_day">#E8FCFF</color>
+    <color name="text_clouds">#5E6569</color>
+    <color name="text_rain">#4A5D69</color>
+    <color name="text_snow">#808080</color>
+    <color name="text_thunderstorm">#2F3B42</color>
+
 </resources>

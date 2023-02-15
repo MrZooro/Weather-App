@@ -78,7 +78,6 @@ class Presenter(view: UpdateView) {
             }
         }
 
-        Log.i("Fuck", forecastCurWeather.size.toString())
         viewForUpdate.UpdateForecastWeather(code)
     }
 

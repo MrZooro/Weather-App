@@ -205,7 +205,7 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
         }
 
         val decimal = weatherList.size
-        atmoPressure = (atmoPressure / decimal)
+        atmoPressure = (atmoPressure / decimal) * 0.75
         humidity = (humidity / decimal)
         clouds = (clouds / decimal)
         visibility = (visibility / decimal)
