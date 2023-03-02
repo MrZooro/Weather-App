@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">weather app</string>
+    <string name="app_name">Weather app</string>
     <string name="hello_blank_fragment">Привет, пустой фрагмент</string>
 
     <string-array name="units_of_measurement">
