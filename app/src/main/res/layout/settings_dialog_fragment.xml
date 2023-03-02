@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/wasteid_settings_title"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="@string/settings"
+        android:textSize="32dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="76dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="76dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/wasteid_background_units_dropdown_menu"
+
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/units_of_measurement"
+
+        app:layout_constraintTop_toBottomOf="@id/wasteid_settings_title"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp" >
+
+        <AutoCompleteTextView
+            android:id="@+id/units_of_measurement_dropdown_menu"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:focusable="false"
+            app:simpleItems="@array/units_of_measurement"
+            tools:ignore="LabelFor" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/wasteid_background_languages_dropdown_menu"
+
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/languages"
+
+        app:layout_constraintTop_toBottomOf="@id/wasteid_background_units_dropdown_menu"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/languages_dropdown_menu"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:focusable="false"
+            app:simpleItems="@array/languages"
+            tools:ignore="LabelFor" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/wasteid_background_atmoPressure_dropdown_menu"
+
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/atmospheric_pressure_units"
+
+        app:layout_constraintTop_toBottomOf="@id/wasteid_background_languages_dropdown_menu"
+        android:layout_marginTop="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="72dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/atmoPressure_dropdown_menu"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:focusable="false"
+            app:simpleItems="@array/atmospheric_pressure"
+            tools:ignore="LabelFor" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/save_button_settings"
+
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+
+        android:backgroundTint="@color/white"
+        style="@style/SaveButtonShape"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:rippleColor="@android:color/holo_green_light"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+
+        android:background="@drawable/ic_check_mark"
+
+        app:layout_constraintTop_toTopOf="@id/save_button_settings"
+        app:layout_constraintBottom_toBottomOf="@id/save_button_settings"
+        app:layout_constraintStart_toStartOf="@id/save_button_settings"
+        app:layout_constraintEnd_toEndOf="@id/save_button_settings"/>
+
+    <Button
+        android:id="@+id/close_button_settings"
+
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+
+        android:backgroundTint="@color/white"
+        style="@style/CloseButtonShape"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:rippleColor="@android:color/holo_red_light"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <View
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+
+        android:background="@drawable/ic_close"
+
+        app:layout_constraintTop_toTopOf="@id/close_button_settings"
+        app:layout_constraintBottom_toBottomOf="@id/close_button_settings"
+        app:layout_constraintStart_toStartOf="@id/close_button_settings"
+        app:layout_constraintEnd_toEndOf="@id/close_button_settings" />
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

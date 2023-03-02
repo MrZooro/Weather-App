@@ -12,17 +12,15 @@ import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.example.weather_app.R
-import com.example.weather_app.databinding.FragmentDialogBinding
-import com.example.weather_app.view.DialogResult
 import kotlin.math.floor
 
-class FragmentDialog : DialogFragment() {
+open class FragmentDialog : DialogFragment() {
 
-    private lateinit var binding: FragmentDialogBinding
     private lateinit var viewForInfo: DialogResult
+    private var requestCode: Int = 300
 
-    private val code300_str : String = "Oups!\\nSomething went wrong..."
-    private val code400_str : String = "Oups!\\nSomething really went wrong..."
+    private lateinit var code300Str : String
+    private lateinit var code400Str : String
 
     @SuppressLint("DialogFragmentCallbacksDetector")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -35,6 +33,9 @@ class FragmentDialog : DialogFragment() {
 
 
         view?.findViewById<Button>(R.id.try_again_button)?.setOnClickListener{
+            if(::viewForInfo.isInitialized) {
+                viewForInfo.DialogResults(1)
+            }
             dismiss()
         }
 
@@ -42,28 +43,38 @@ class FragmentDialog : DialogFragment() {
         return alertDialog.create()
     }
 
-    fun show(manager: FragmentManager, tag: String, requestCode: Int, dialogResult: DialogResult) {
+    fun show(manager: FragmentManager, tag: String, tempRequestCode: Int, dialogResult: DialogResult) {
         Log.i("Info", "FragmentDialog: The dialog is displayed")
-
-        if(requestCode == 300) {
-            view?.findViewById<TextView>(R.id.tv_error_message)?.text = code300_str
-        } else {
-            view?.findViewById<TextView>(R.id.tv_error_message)?.text = code400_str
-        }
+        requestCode = tempRequestCode
 
         viewForInfo = dialogResult
-        if(!manager.isDestroyed) {
+        if (!manager.isDestroyed) {
             show(manager, tag)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        code300Str = activity?.getString(R.string.code300Str).toString()
+        code400Str = activity?.getString(R.string.code400Str).toString()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (requestCode == 300) {
+            dialog?.findViewById<TextView>(R.id.tv_error_message)?.text =
+                code300Str
+        } else {
+            dialog?.findViewById<TextView>(R.id.tv_error_message)?.text =
+                code400Str
         }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
         Log.i("Info", "FragmentDialog: Dismiss")
-
-        if (::viewForInfo.isInitialized) {
-            viewForInfo.DialogResults(1)
-        }
     }
 
     override fun onResume() {
@@ -81,5 +92,4 @@ class FragmentDialog : DialogFragment() {
             dialog!!.window!!.attributes = params as WindowManager.LayoutParams
         }
     }
-
 }

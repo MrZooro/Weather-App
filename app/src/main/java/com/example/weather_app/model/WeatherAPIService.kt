@@ -20,8 +20,8 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
         .build()
         .create(WeatherAPI::class.java)
 
-    fun getCurrentWeather(lat : Double, lon : Double) {
-        URLcurWeather = "${URLcurWeather}lat=$lat&lon=$lon&appid=$MainApiKey"
+    fun getCurrentWeather(lat : Double, lon : Double, units: String, lang: String) {
+        URLcurWeather = "${URLcurWeather}lat=$lat&lon=$lon&lang=$lang&appid=$MainApiKey&units=$units"
 
 
         val call = retrofit.getDataCurrentWeather(URLcurWeather)
@@ -51,8 +51,8 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
         MainPresener.setCurrentWeather(data, code)
     }
 
-    fun getForecastWeather(lat: Double, lon: Double) {
-        URLforWeather = "${URLforWeather}lat=$lat&lon=$lon&appid=$MainApiKey"
+    fun getForecastWeather(lat: Double, lon: Double, units: String) {
+        URLforWeather = "${URLforWeather}lat=$lat&lon=$lon&appid=$MainApiKey&units=$units"
 
         val call = retrofit.getDataForecastWeather(URLforWeather)
         call.enqueue(object : Callback<ForecastWeather>{

@@ -16,6 +16,43 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <!--Форма кнопки с текущей погодой-->
+    <style name="CurrentWeatherBackground" parent="Widget.Material3.Button">
+        <item name="shapeAppearance">@style/MyShapeAppearance</item>
+    </style>
+
+    <style name="MyShapeAppearance" parent="Widget.Material3.Button">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeBottomLeft">40dp</item>
+        <item name="cornerSizeBottomRight">40dp</item>
+        <item name="cornerFamilyTopLeft">cut</item>
+        <item name="cornerFamilyTopRight">cut</item>
+    </style>
+
+    <style name="CloseButtonShape" parent="Widget.Material3.Button">
+        <item name="shapeAppearance">@style/CloseButtonShapeAppearance</item>
+    </style>
+
+    <style name="CloseButtonShapeAppearance" parent="Widget.Material3.Button">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">10dp</item>
+        <item name="cornerSizeTopRight">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="SaveButtonShape" parent="Widget.Material3.Button">
+        <item name="shapeAppearance">@style/SaveButtonShapeAppearance</item>
+    </style>
+
+    <style name="SaveButtonShapeAppearance" parent="Widget.Material3.Button">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeTopRight">10dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
     <style name="dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:windowBackground">@drawable/dialog_shape</item>
         <item name="android:windowAnimationStyle">@style/animation</item>
@@ -26,16 +63,10 @@
         <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
     </style>
 
-    <style name="CurrentWeatherBackground" parent="Widget.Material3.Button">
-        <item name="shapeAppearance">@style/MyShapeAppearance</item>
-    </style>
-    
-    <style name="MyShapeAppearance" parent="Widget.Material3.Button">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSizeBottomLeft">40dp</item>
-        <item name="cornerSizeBottomRight">40dp</item>
-        <item name="cornerFamilyTopLeft">cut</item>
-        <item name="cornerFamilyTopRight">cut</item>
+
+
+    <style name="settings_dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/dialog_shape</item>
     </style>
 
 </resources>

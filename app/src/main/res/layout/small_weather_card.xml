@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="80dp"
+    android:layout_width="88dp"
     android:layout_height="116dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -8,7 +8,7 @@
     <Button
         android:id="@+id/small_weather_card"
         style="@style/Widget.Material3.Button"
-        android:layout_width="80dp"
+        android:layout_width="88dp"
         android:layout_height="116dp"
         android:backgroundTint="@color/clear_day"
 
@@ -21,7 +21,7 @@
     <TextView
         android:id="@+id/card_date"
 
-        android:text="Monday\n15/11/2022"
+        android:text=""
         android:textColor="@color/text_color"
         android:textSize="12dp"
         android:gravity="center"
@@ -48,7 +48,7 @@
     <TextView
         android:id="@+id/card_temperature"
 
-        android:text="23°C"
+        android:text=""
         android:textSize="12dp"
         android:textStyle="bold"
         android:textColor="@color/text_color"

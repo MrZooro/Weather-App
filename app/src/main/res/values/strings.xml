@@ -1,5 +1,58 @@
 <resources>
-    <string name="app_name">weather_app</string>
+    <string name="app_name">weather app</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    
+    <string-array name="units_of_measurement">
+        <item>standard</item>
+        <item>metric</item>
+        <item>imperial</item>
+    </string-array>
+
+    <string-array name="languages">
+        <item>English</item>
+        <item>Русский</item>
+    </string-array>
+
+    <string-array name="atmospheric_pressure">
+        <item>hPa</item>
+        <item>mmHg</item>
+    </string-array>
+
+
+    <string name="speed_standard">m/s</string>
+    <string name="speed_metrics">m/s</string>
+    <string name="speed_imperial">mi/h</string>
+
+    <string name="temperature_standard">°K</string>
+    <string name="temperature_metrics">°C</string>
+    <string name="temperature_imperial">°F</string>
+
+    <string name="distance_standard">m</string>
+    <string name="distance_metrics">m</string>
+    <string name="distance_imperial">ft</string>
+
+    <string name="mmHg">mmHg</string>
+    <string name="hPa">hPa</string>
+
+    <string name="five_days">5 Days</string>
+
+    <string name="feels_like">feels like: </string>
+
+    <string name="code300Str">"Oups!\nSomething went wrong…"</string>
+    <string name="code400Str">"Oups! Something really went wrong…"</string>
+    <string name="explanation_of_the_error">Couldn\'t load the weather forecast. Most likely there is no internet connection.</string>
+    <string name="try_again">Try again</string>
+
+    <string name="atmospheric_pressure">"Atmospheric pressure: "</string>
+    <string name="humidity">"Humidity: "</string>
+    <string name="cloud_cover">"Cloud cover: "</string>
+    <string name="visibility_max_10_km_6_2_mi">"Visibility (max 10 km / 6.2 mi): "</string>
+    <string name="wind_speed">"Wind speed:"</string>
+    <string name="probability_of_precipitation">Probability of precipitation:</string>
+    <string name="settings">Settings</string>
+    <string name="units_of_measurement">Units of measurement</string>
+    <string name="languages">Language</string>
+    <string name="atmospheric_pressure_units">Atmospheric pressure units</string>
+
 </resources>

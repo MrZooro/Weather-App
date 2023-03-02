@@ -12,7 +12,7 @@
     <TextView
         android:id="@+id/tv_error_message"
 
-        android:text="Oups!\nSomething really went wrong..."
+        android:text=""
         android:textSize="20dp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -31,7 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:text="Couldn't load the weather forecast. Most likely there is no internet connection."
+        android:text="@string/explanation_of_the_error"
         android:textSize="16dp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -45,12 +45,12 @@
     <Button
         android:id="@+id/try_again_button"
         style="@style/Widget.Material3.Button"
-        android:layout_width="120dp"
+        android:layout_width="164dp"
         android:layout_height="44dp"
         android:backgroundTint="@color/grey_200"
         android:clickable="true"
 
-        android:text="Try Again"
+        android:text="@string/try_again"
         android:textColor="@color/black"
         android:textStyle="bold"
 

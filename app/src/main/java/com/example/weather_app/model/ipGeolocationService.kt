@@ -20,8 +20,9 @@ class ipGeolocationService(presenter : Presenter) {
         .build()
         .create(GeolocationAPI::class.java)
 
-    fun getGeolocation() {
-        val call = retrofit.getGeolocation(BaseURL)
+    fun getGeolocation(lang: String) {
+        val tempURL = "$BaseURL?lang=$lang"
+        val call = retrofit.getGeolocation(tempURL)
         call.enqueue(object : Callback<ipGeolocation> {
             override fun onResponse(call: Call<ipGeolocation>, response: Response<ipGeolocation>) {
                 if (response.isSuccessful) {

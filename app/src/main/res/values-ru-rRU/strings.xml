@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">weather app</string>
+    <string name="hello_blank_fragment">Привет, пустой фрагмент</string>
+
+    <string-array name="units_of_measurement">
+        <item>standard</item>
+        <item>metric</item>
+        <item>imperial</item>
+    </string-array>
+
+    <string-array name="languages">
+        <item>English</item>
+        <item>Русский</item>
+    </string-array>
+
+    <string-array name="atmospheric_pressure">
+        <item>hPa</item>
+        <item>mmHg</item>
+    </string-array>
+
+    <string name="speed_standard">м/с</string>
+    <string name="speed_metrics">м/с</string>
+    <string name="speed_imperial">миля/ч</string>
+
+    <string name="temperature_standard">°K</string>
+    <string name="temperature_metrics">°C</string>
+    <string name="temperature_imperial">°F</string>
+
+    <string name="distance_standard">м</string>
+    <string name="distance_metrics">м</string>
+    <string name="distance_imperial">фут</string>
+
+    <string name="mmHg">мм рт.ст.</string>
+    <string name="hPa">гПа</string>
+
+    <string name="five_days">5 Дней</string>
+
+    <string name="feels_like">"ощущяется как: "</string>
+    <string name="atmospheric_pressure">"Атмосферное давление: "</string>
+    <string name="humidity">"Влажность: "</string>
+    <string name="cloud_cover">"Облачность: "</string>
+    <string name="visibility_max_10_km_6_2_mi">"Видимость (максимум 10 км / 6,2 мили): "</string>
+    <string name="wind_speed">"Скорость ветра: "</string>
+    <string name="probability_of_precipitation">"Вероятность осадков: "</string>
+
+    <string name="settings">Настройки</string>
+    <string name="units_of_measurement">Единицы измерения</string>
+    <string name="languages">Язык</string>
+    <string name="atmospheric_pressure_units">Единицы измерения атмосферного давления</string>
+
+    <string name="code300Str">Упс!\nЧто-то пошло не так…</string>
+    <string name="code400Str">Упс! Что-то действительно пошло не так…</string>
+    <string name="explanation_of_the_error">Не удалось загрузить прогноз погоды. Скорее всего, нет подключения к Интернету.</string>
+    <string name="try_again">Пробовать cнова</string>
+</resources>

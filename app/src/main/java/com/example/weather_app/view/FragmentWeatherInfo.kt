@@ -1,6 +1,7 @@
 package com.example.weather_app.view
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
@@ -9,7 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.example.weather_app.R
 import com.example.weather_app.model.current_weather.CurrentWeather
 import com.example.weather_app.model.forecast_weather.ForecastWeatherItem
@@ -25,7 +28,7 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
                           private val context : MainActivity): BottomSheetDialogFragment() {
 
     private val dateFormat : SimpleDateFormat = SimpleDateFormat("EEEE\ndd/MM/yyyy", Locale.US)
-    private val hoursMinutes : SimpleDateFormat = SimpleDateFormat("hh:mm", Locale.US)
+    private val hoursMinutes : SimpleDateFormat = SimpleDateFormat("HH:mm", Locale.US)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,10 +39,6 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
 
         return inflater.inflate(R.layout.fragment_weather_info, container, false)
 
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
     }
 
     private lateinit var mainView : View
@@ -160,7 +159,7 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
             params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
             params.marginStart = ceil(layoutMargin).toInt()
 
-            if(i == weatherList.size-1) {
+            if(i == newWeatherList.size-1) {
                 params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
                 params.marginEnd = ceil(18 * ds.density).toInt()
             }
@@ -170,19 +169,37 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
             layer.findViewById<TextView>(R.id.big_card_time_tv).text = timeList[i]
 
             layer.findViewById<View>(R.id.big_card_weather_icon).background =
-                context.SMALLweatherStateImage[weatherList[i].weather[0].main]?.let {
+                context.smallWeatherStateImage[newWeatherList[i].weather[0].main]?.let {
                     getDrawable(context, it)
                 }
 
+            val tempCardColor = context.cardColor[newWeatherList[i].weather[0].main]
+            if(tempCardColor != null) {
+                layer.findViewById<CardView>(R.id.big_card_background).backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(context, tempCardColor))
+            }
+
+            val tempTextColor = context.textColor[newWeatherList[i].weather[0].main]
+            if(tempTextColor != null) {
+                layer.findViewById<TextView>(R.id.big_card_time_tv)
+                    .setTextColor(ContextCompat.getColor(context, tempTextColor))
+                layer.findViewById<TextView>(R.id.big_card_weather_description_tv)
+                    .setTextColor(ContextCompat.getColor(context, tempTextColor))
+                layer.findViewById<TextView>(R.id.big_card_temperature_tv)
+                    .setTextColor(ContextCompat.getColor(context, tempTextColor))
+                layer.findViewById<TextView>(R.id.big_card_feels_like_tv)
+                    .setTextColor(ContextCompat.getColor(context, tempTextColor))
+            }
+
             layer.findViewById<TextView>(R.id.big_card_weather_description_tv).text =
-                weatherList[i].weather[0].description
+                newWeatherList[i].weather[0].description
 
             layer.findViewById<TextView>(R.id.big_card_temperature_tv).text =
-                getTemperatureStr(weatherList[i].main.temp)
+                getTemperatureStr(newWeatherList[i].main.temp)
 
             val tempTextView = layer.findViewById<TextView>(R.id.big_card_feels_like_tv)
             tempTextView.text = tempTextView.text.toString() +
-                    getTemperatureStr(weatherList[i].main.feels_like) + "°C"
+                    getTemperatureStr(newWeatherList[i].main.feels_like)
 
             constraintLayout?.addView(layer)
         }
@@ -197,21 +214,29 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
         var clouds = 0.0
         var visibility = 0.0
 
-        for(i in weatherList.indices) {
-            atmoPressure += weatherList[i].main.pressure
-            humidity += weatherList[i].main.humidity
-            clouds += weatherList[i].clouds.all
-            visibility += weatherList[0].visibility
+        for(i in newWeatherList.indices) {
+            atmoPressure += newWeatherList[i].main.pressure
+            humidity += newWeatherList[i].main.humidity
+            clouds += newWeatherList[i].clouds.all
+            visibility += newWeatherList[0].visibility
         }
 
-        val decimal = weatherList.size
-        atmoPressure = (atmoPressure / decimal) * 0.75
+        val decimal = newWeatherList.size
+        atmoPressure = (atmoPressure / decimal)
         humidity = (humidity / decimal)
         clouds = (clouds / decimal)
         visibility = (visibility / decimal)
 
+        if(context.getUnitsOfMeasurement()[0] == 'i') {
+            visibility *= 0.3048
+        }
+
+        if(context.getAtmoPressureUnits()[0] == 'm') {
+            atmoPressure *= 0.75
+        }
+
         var tempTV = mainView.findViewById<TextView>(R.id.fwi_atmospheric_pressure_tv)
-        tempTV.text = tempTV.text.toString() + atmoPressure.roundToInt() + " mmHg"
+        tempTV.text = tempTV.text.toString() + atmoPressure.roundToInt() + " " + context.getAtmoPressureMark()
 
         tempTV = mainView.findViewById(R.id.fwi_humidity_tv)
         tempTV.text = tempTV.text.toString() + humidity.roundToInt() + "%"
@@ -220,7 +245,7 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
         tempTV.text = tempTV.text.toString() + clouds.roundToInt() + "%"
 
         tempTV = mainView.findViewById(R.id.fwi_visibility_tv)
-        tempTV.text = tempTV.text.toString() + visibility.roundToInt() + " m"
+        tempTV.text = tempTV.text.toString() + visibility.roundToInt() + " " + context.getDistanceMark()
 
         val calendar = Calendar.getInstance()
         val dateStr = weatherList[0].dt_txt.split(" ")[0].split("-")
@@ -253,17 +278,33 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
             params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
             params.marginStart = ceil(layoutMargin).toInt()
 
-            if(i == weatherList.size-1) {
+            if(i == newWeatherList.size-1) {
                 params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
                 params.marginEnd = ceil(18 * ds.density).toInt()
             }
             layer.layoutParams = params
             layoutMargin += defaultMargin
 
+            val tempCardColor = context.cardColor[newWeatherList[i].weather[0].main]
+
+            if(tempCardColor != null) {
+                layer.findViewById<CardView>(R.id.data_card_background).backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(context, tempCardColor))
+            }
+
+            val tempTextColor = context.textColor[newWeatherList[i].weather[0].main]
+
+            if(tempTextColor != null) {
+                layer.findViewById<TextView>(R.id.data_card_time_tv)
+                    .setTextColor(ContextCompat.getColor(context, tempTextColor))
+                layer.findViewById<TextView>(R.id.data_card_info_tv)
+                    .setTextColor(ContextCompat.getColor(context, tempTextColor))
+            }
+
             layer.findViewById<TextView>(R.id.data_card_time_tv).text = timeList[i]
 
             layer.findViewById<TextView>(R.id.data_card_info_tv).text =
-                weatherList[i].wind.speed.roundToInt().toString() + " m/sec"
+                newWeatherList[i].wind.speed.roundToInt().toString() + " " + context.getSpeedMark()
 
             constraintLayout?.addView(layer)
         }
@@ -291,17 +332,33 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
             params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
             params.marginStart = ceil(layoutMargin).toInt()
 
-            if(i == weatherList.size-1) {
+            if(i == newWeatherList.size-1) {
                 params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
                 params.marginEnd = ceil(18 * ds.density).toInt()
             }
             layer.layoutParams = params
             layoutMargin += defaultMargin
 
+            val tempCardColor = context.cardColor[newWeatherList[i].weather[0].main]
+
+            if(tempCardColor != null) {
+                layer.findViewById<CardView>(R.id.data_card_background).backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(context, tempCardColor))
+            }
+
+            val tempTextColor = context.textColor[newWeatherList[i].weather[0].main]
+
+            if(tempTextColor != null) {
+                layer.findViewById<TextView>(R.id.data_card_time_tv)
+                    .setTextColor(ContextCompat.getColor(context, tempTextColor))
+                layer.findViewById<TextView>(R.id.data_card_info_tv)
+                    .setTextColor(ContextCompat.getColor(context, tempTextColor))
+            }
+
             layer.findViewById<TextView>(R.id.data_card_time_tv).text = timeList[i]
 
             layer.findViewById<TextView>(R.id.data_card_info_tv).text =
-                (weatherList[i].pop * 100).toString() + "%"
+                String.format("%.1f", newWeatherList[i].pop * 100) + "%"
 
             constraintLayout?.addView(layer)
         }
@@ -309,12 +366,12 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
 
     private fun getTemperatureStr(temperature: Double) : String{
 
-        val roundTemp : Int = (temperature - 273.15).roundToInt()
+        val roundTemp : Int = (temperature).roundToInt()
 
         return if(roundTemp > 0) {
-            "+$roundTemp"
+            "+$roundTemp" + context.getTemperatureMark()
         } else if(roundTemp < 0) {
-            "$roundTemp"
+            "$roundTemp" + context.getTemperatureMark()
         } else "0"
     }
 

@@ -27,11 +27,11 @@ class Presenter(view: UpdateView) {
     private lateinit var forecastWeatherByDay: MutableList<List<ForecastWeatherItem>>
     private lateinit var forecastCurWeather: List<ForecastWeatherItem>
 
-    fun updateWeather(lat : Double, lon : Double, apiKey : String) {
+    fun updateWeather(lat : Double, lon : Double, apiKey : String, units : String, lang: String) {
         weatherAPIService = WeatherAPIService(this, apiKey)
 
-        weatherAPIService.getCurrentWeather(lat, lon)
-        weatherAPIService.getForecastWeather(lat, lon)
+        weatherAPIService.getCurrentWeather(lat, lon, units, lang)
+        weatherAPIService.getForecastWeather(lat, lon, units)
     }
 
     fun setCurrentWeather(NEWcurrentWeather: CurrentWeather?, code : Int){
@@ -89,9 +89,9 @@ class Presenter(view: UpdateView) {
         return currentWeather
     }
 
-    fun updateGeolocation() {
+    fun updateGeolocation(lang: String) {
         GeolocationService = ipGeolocationService(this)
-        GeolocationService.getGeolocation()
+        GeolocationService.getGeolocation(lang)
     }
 
     fun sendGeolocation(data: ipGeolocation?, code: Int) {

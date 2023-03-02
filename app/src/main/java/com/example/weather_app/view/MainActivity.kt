@@ -2,6 +2,7 @@ package com.example.weather_app.view
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.transition.AutoTransition
@@ -14,7 +15,6 @@ import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -22,7 +22,6 @@ import androidx.core.content.ContextCompat
 import com.example.weather_app.BuildConfig
 import com.example.weather_app.R
 import com.example.weather_app.databinding.ActivityMainBinding
-import com.example.weather_app.model.current_weather.CurrentWeather
 import com.example.weather_app.model.forecast_weather.ForecastWeatherItem
 import com.example.weather_app.model.ip_geolocation.ipGeolocation
 import com.example.weather_app.presenter.Presenter
@@ -32,7 +31,6 @@ import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
-import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.ceil
@@ -47,30 +45,58 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     private var city : Place? = null
     private lateinit var date : Calendar
 
-    private val dateFormat : SimpleDateFormat = SimpleDateFormat("EEEE\ndd/MM/yyyy", Locale.US)
+    private val ruLocale = Locale("ru")
+    private val enLocale = Locale("en")
+    private var dateFormat : SimpleDateFormat = SimpleDateFormat("EEEE\ndd/MM/yyyy", Locale.US)
 
     var startBSDF = false
 
-    private var isRefreshing = false
+    private var settingsDialogOpen = false
+    private var connectionDialogOpen = false
+
+    private var unitsOfMeasurement = "standard"
+    private var language = "English"
+    private var langCode = "en"
+    private var atmoPressureUnits = "mmHg"
+
+    private lateinit var saveInfo: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        saveInfo = getSharedPreferences("save_info", MODE_PRIVATE)
 
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        val tempUnits = saveInfo.getString("unitsOfMeasurement", "standard")
+        if(tempUnits != null) {
+            unitsOfMeasurement = tempUnits
+        }
+        val tempLanguage = saveInfo.getString("language", "English")
+        if(tempLanguage != null) {
+            language = tempLanguage
+        }
 
-        Places.initialize(applicationContext, BuildConfig.Places_API_KEY, Locale.ENGLISH)
-        Places.createClient(this)
-
-        binding.edittextLocation.isFocusable = false
-        binding.edittextLocation.setOnClickListener(this)
-
+        langCode = if(language[0] == 'E') {
+            "en"
+        } else {
+            "ru"
+        }
 
         presenter = Presenter(this)
         binding.refreshLayout.isRefreshing = true
-        isRefreshing = true
-        presenter.updateGeolocation()
+        setAppLocale()
+
+        val tempAtmoPressure = saveInfo.getString("atmoPressureUnits", "mmHg")
+        if(tempAtmoPressure != null) {
+            atmoPressureUnits = tempAtmoPressure
+        }
+
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+        binding.edittextLocation.isFocusable = false
+        binding.edittextLocation.setOnClickListener(this)
 
         binding.backToUserGeolocationButton.setOnClickListener{
             binding.backToUserGeolocationButton.isClickable = false
@@ -78,30 +104,85 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             city = null
 
             binding.refreshLayout.isRefreshing = true
-            isRefreshing = true
 
-            presenter.updateGeolocation()
+            presenter.updateGeolocation(langCode)
         }
 
         binding.refreshLayout.setOnRefreshListener {
-            if(city != null) {
-                val lat = city?.latLng?.latitude
-                val lon = city?.latLng?.longitude
+            refresh()
+        }
 
-                if(lat != null && lon != null) {
-                    getCur = false
-                    getFor = false
-                    isRefreshing = true
-                    presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
-                } else {
-                    Log.w("Warning", "Places: latitude or longitude is null")
-                }
-            } else {
-                isRefreshing = true
-                presenter.updateGeolocation()
+        binding.settingsButton.setOnClickListener{
+            if(!settingsDialogOpen) {
+                settingsDialogOpen = true
+                val settings = SettingsFragmentDialog(this, unitsOfMeasurement, language,
+                    atmoPressureUnits)
+
+                settings.show(supportFragmentManager, "Something")
             }
+        }
+    }
 
+    private fun setAppLocale() {
+        if(language[0] == 'E') {
+            Locale.setDefault(enLocale)
+            val config = resources.configuration
+            config.setLocale(enLocale)
+            resources.updateConfiguration(config, resources.displayMetrics)
+            dateFormat = SimpleDateFormat("EEEE\ndd/MM/yyyy", enLocale)
 
+            Places.initialize(applicationContext, BuildConfig.Places_API_KEY, enLocale)
+            Places.createClient(this)
+
+            if(city != null) {
+                binding.backToUserGeolocationButton.isClickable = false
+                binding.backToUserGeolocationButton.visibility = View.GONE
+                city = null
+
+                binding.refreshLayout.isRefreshing = true
+            }
+            presenter.updateGeolocation(langCode)
+        } else {
+            Locale.setDefault(ruLocale)
+            val config = resources.configuration
+            config.setLocale(ruLocale)
+            resources.updateConfiguration(config, resources.displayMetrics)
+            dateFormat = SimpleDateFormat("EEEE\ndd/MM/yyyy", ruLocale)
+
+            Places.initialize(applicationContext, BuildConfig.Places_API_KEY, ruLocale)
+            Places.createClient(this)
+
+            if(city != null) {
+                binding.backToUserGeolocationButton.isClickable = false
+                binding.backToUserGeolocationButton.visibility = View.GONE
+                city = null
+
+                binding.refreshLayout.isRefreshing = true
+            }
+            presenter.updateGeolocation(langCode)
+        }
+    }
+
+    private fun refresh() {
+        if (city != null) {
+            val lat = city?.latLng?.latitude
+            val lon = city?.latLng?.longitude
+
+            if (lat != null && lon != null) {
+                getCur = false
+                getFor = false
+                presenter.updateWeather(
+                    lat,
+                    lon,
+                    BuildConfig.OpenWeatherMap_API_KEY,
+                    unitsOfMeasurement,
+                    langCode
+                )
+            } else {
+                Log.w("Warning", "Places: latitude or longitude is null")
+            }
+        } else {
+            presenter.updateGeolocation(langCode)
         }
     }
 
@@ -112,8 +193,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
         val ds : DisplayMetrics = resources.displayMetrics
         val layoutHeight = 116 * ds.density
-        val layoutWidth = 80 * ds.density
-        val defaultMargin = 88 * ds.density
+        val layoutWidth = 88 * ds.density
+        val defaultMargin = 96 * ds.density
         var layoutMargin = 18 * ds.density
 
         val tempCalendar = date
@@ -176,8 +257,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
             layer.findViewById<TextView>(R.id.card_date).text = dateFormat.format(tempCalendar.time)
 
-            val minTempInt = (minTemp - 273.15).roundToInt()
-            val maxTempInt = (maxTemp - 273.15).roundToInt()
+            val minTempInt = (minTemp).roundToInt()
+            val maxTempInt = (maxTemp).roundToInt()
 
             var tempStr: String = if (minTempInt < 0) {
                 "$minTempInt .. "
@@ -188,17 +269,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             }
 
             tempStr += if(maxTempInt < 0) {
-                "$maxTempInt"
+                "$maxTempInt" + getTemperatureMark()
             } else if (maxTempInt > 0) {
-                "+$maxTempInt"
+                "+$maxTempInt" + getTemperatureMark()
             } else {
-                "0"
+                "0" + getTemperatureMark()
             }
 
             layer.findViewById<TextView>(R.id.card_temperature).text = tempStr
 
             layer.findViewById<View>(R.id.card_weather_icon).background =
-                SMALLweatherStateImage[whatWeatherDescription]?.let { getDrawable(it) }
+                smallWeatherStateImage[whatWeatherDescription]?.let { getDrawable(it) }
 
             tempTextColor = textColor[whatWeatherDescription]
             if(tempTextColor != null) {
@@ -239,8 +320,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             layoutMargin += defaultMargin
         }
 
-
-
+        binding.wasteidScrollView.smoothScrollTo(0, 0)
     }
 
     @SuppressLint("UseCompatLoadingForDrawables", "SetTextI18n")
@@ -269,18 +349,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
                 window.statusBarColor = ContextCompat.getColor(applicationContext, tempCardColor)
             }
 
-            val tempTemperature = ((currentWeather.main.temp - 273.15).roundToInt())
+            val tempTemperature = (currentWeather.main.temp).roundToInt()
             if(tempTemperature > 0) {
-                binding.currentTemperature.text = "+$tempTemperature°C"
+                binding.currentTemperature.text = "+$tempTemperature" + getTemperatureMark()
             } else if(tempTemperature < 0) {
-                binding.currentTemperature.text = "$tempTemperature°C"
+                binding.currentTemperature.text = "$tempTemperature" + getTemperatureMark()
             } else {
-                binding.currentTemperature.text = "0"
+                binding.currentTemperature.text = "0" + getTemperatureMark()
             }
 
             binding.currentDate.text = dateFormat.format(date.time)
             binding.BIGweatherIcon.background =
-                BIGweatherStateImage[currentWeather.weather[0].main]?.let {
+                bigWeatherStateImage[currentWeather.weather[0].main]?.let {
                 getDrawable(
                     it
                 )
@@ -307,7 +387,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         val intent = application?.let {
             Autocomplete.IntentBuilder(
                 AutocompleteActivityMode.FULLSCREEN, fields)
-                .setTypesFilter(Arrays.asList(PlaceTypes.CITIES))
+                .setTypesFilter(listOf(PlaceTypes.CITIES))
                 .build(it)
         }
         if (intent != null) {
@@ -319,19 +399,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 300) {
-            if (resultCode == RESULT_OK) {
-                val place = Autocomplete.getPlaceFromIntent(data!!)
-                city = place
-                Log.i("OK", "Places: ${place.name}")
+            when (resultCode) {
+                RESULT_OK -> {
+                    val place = Autocomplete.getPlaceFromIntent(data!!)
+                    city = place
+                    Log.i("OK", "Places: ${place.name}")
 
-                changeCity()
+                    changeCity()
 
-                binding.backToUserGeolocationButton.isClickable = true
-                binding.backToUserGeolocationButton.visibility = View.VISIBLE
-            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                Log.w("Error:", "Places: Something went wrong")
-            } else if (resultCode == AutocompleteActivity.RESULT_CANCELED) {
-                Log.w("Error:", "Places: Cancel")
+                    binding.backToUserGeolocationButton.isClickable = true
+                    binding.backToUserGeolocationButton.visibility = View.VISIBLE
+                }
+                AutocompleteActivity.RESULT_ERROR -> {
+                    Log.w("Error:", "Places: Something went wrong")
+                }
+                AutocompleteActivity.RESULT_CANCELED -> {
+                    Log.w("Error:", "Places: Cancel")
+                }
             }
         }
     }
@@ -347,9 +431,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             getCur = false
 
             binding.refreshLayout.isRefreshing = true
-            isRefreshing = true
 
-            presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
+            presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY,
+                unitsOfMeasurement, langCode)
         } else {
             Log.w("Warning", "Places: latitude or longitude is null")
         }
@@ -357,8 +441,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     }
 
     override fun UpdateCurrentWeather(code: Int) {
-        if(isRefreshing) {
-            isRefreshing = false
+        if(binding.refreshLayout.isRefreshing) {
             binding.refreshLayout.isRefreshing = false
         }
 
@@ -368,13 +451,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
             changeMainCard()
         } else {
-            startDialog(2, code)
+            startConnectionDialog(2, code)
         }
     }
 
     override fun UpdateForecastWeather(code: Int) {
-        if(isRefreshing) {
-            isRefreshing = false
+        if(binding.refreshLayout.isRefreshing) {
             binding.refreshLayout.isRefreshing = false
         }
 
@@ -382,16 +464,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             date = Calendar.getInstance()
             getFor = true
 
+            val sceneRoot = binding.forTransition as ViewGroup
+            val autoTransition = AutoTransition()
+            autoTransition.duration = 50
+            autoTransition.interpolator = LinearInterpolator()
+            TransitionManager.beginDelayedTransition(sceneRoot, autoTransition)
+            
             binding.placeForFutureDays.removeAllViews()
             fillScrollView()
         } else {
-            startDialog(3, code)
+            startConnectionDialog(3, code)
         }
     }
 
     override fun UpdateGeolocation(NEWgeolocation: ipGeolocation?, code: Int) {
-        if(isRefreshing) {
-            isRefreshing = false
+        if(binding.refreshLayout.isRefreshing) {
             binding.refreshLayout.isRefreshing = false
         }
 
@@ -402,41 +489,51 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             getFor = false
             getCur = false
 
-            presenter.updateWeather(NEWgeolocation.lat, NEWgeolocation.lon, BuildConfig.OpenWeatherMap_API_KEY)
+            presenter.updateWeather(NEWgeolocation.lat, NEWgeolocation.lon,
+                BuildConfig.OpenWeatherMap_API_KEY, unitsOfMeasurement, langCode)
         } else {
-            startDialog(1, code)
+            startConnectionDialog(1, code)
         }
     }
 
     private var getCur : Boolean = false
     private var getFor : Boolean = false
-    private  val connectionDialog = FragmentDialog()
-    private fun startDialog(serviceCode : Int, code: Int) {
-
-        println(serviceCode)
+    private fun startConnectionDialog(serviceCode : Int, code: Int) {
         when (serviceCode) {
             1 -> {
-                connectionDialog.show(
-                    supportFragmentManager, "No connection dialog",
-                    code, this
-                )
-            }
-            2 -> {
-                if (getFor) {
+                if(!connectionDialogOpen) {
+                    connectionDialogOpen = true
+                    val connectionDialog = FragmentDialog()
                     connectionDialog.show(
                         supportFragmentManager, "No connection dialog",
                         code, this
                     )
+                }
+            }
+            2 -> {
+                if (getFor) {
+                    if(!connectionDialogOpen) {
+                        connectionDialogOpen = true
+                        val connectionDialog = FragmentDialog()
+                        connectionDialog.show(
+                            supportFragmentManager, "No connection dialog",
+                            code, this
+                        )
+                    }
                 } else {
                     getCur = true
                 }
             }
             3 -> {
                 if (getCur) {
-                    connectionDialog.show(
-                        supportFragmentManager, "No connection dialog",
-                        code, this
-                    )
+                    if(!connectionDialogOpen) {
+                        connectionDialogOpen = true
+                        val connectionDialog = FragmentDialog()
+                        connectionDialog.show(
+                            supportFragmentManager, "No connection dialog",
+                            code, this
+                        )
+                    }
                 } else {
                     getFor = true
                 }
@@ -445,33 +542,166 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     }
 
     override fun DialogResults(code: Int) {
-        getFor = false
-        getCur = false
+        if(code % 10 == 2) {
+            var tempCode = code / 10
+            settingsDialogOpen = false
+            if(tempCode == 0) return
 
-        if(city != null) {
-            val lat = city?.latLng?.latitude
-            val lon = city?.latLng?.longitude
+            var tempAtmoPressure = ""
+            when(tempCode % 10) {
+                1 -> {
+                    tempAtmoPressure = "mmHg"
+                }
+                2 -> {
+                    tempAtmoPressure = "hPa"
+                }
+            }
+            tempCode /= 10
+            if(tempAtmoPressure.isNotEmpty() && atmoPressureUnits[0] != tempAtmoPressure[0]) {
+                atmoPressureUnits = tempAtmoPressure
+            }
 
-            if(lat != null && lon != null) {
-                getCur = false
-                getFor = false
+            var tempLanguage = ""
+            when(tempCode % 10){
+                1 -> {
+                    tempLanguage = "English"
+                }
+                2 -> {
+                    tempLanguage = "Russian"
+                }
+            }
+            tempCode /= 10
+            if(tempLanguage.isNotEmpty() && language[0] != tempLanguage[0]) {
+                language = tempLanguage
+                if(language[0] == 'E') {
+                    langCode = "en"
+                } else {
+                    langCode = "ru"
+                }
+                setAppLocale()
+            }
+
+            var tempUnits = ""
+            when(tempCode % 10){
+                1 -> {
+                    tempUnits = "standard"
+                }
+                2 -> {
+                    tempUnits = "metric"
+                }
+                3 -> {
+                    tempUnits = "imperial"
+                }
+            }
+            if(tempUnits.isNotEmpty() && unitsOfMeasurement[0] != tempUnits[0]) {
+                unitsOfMeasurement = tempUnits
 
                 binding.refreshLayout.isRefreshing = true
-                isRefreshing = true
 
-                presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY)
-            } else {
-                Log.w("Warning", "Places: latitude or longitude is null")
+                refresh()
             }
-        } else {
-            binding.refreshLayout.isRefreshing = true
-            isRefreshing = true
 
-            presenter.updateGeolocation()
+
+            return
+        }
+
+        if(code % 10 == 1) {
+            getFor = false
+            getCur = false
+
+            connectionDialogOpen = false
+
+            if (city != null) {
+                val lat = city?.latLng?.latitude
+                val lon = city?.latLng?.longitude
+
+                if (lat != null && lon != null) {
+                    getCur = false
+                    getFor = false
+
+                    binding.refreshLayout.isRefreshing = true
+
+                    presenter.updateWeather(
+                        lat, lon, BuildConfig.OpenWeatherMap_API_KEY,
+                        unitsOfMeasurement, langCode
+                    )
+                } else {
+                    Log.w("Warning", "Places: latitude or longitude is null")
+                }
+            } else {
+                binding.refreshLayout.isRefreshing = true
+
+                presenter.updateGeolocation(langCode)
+            }
         }
     }
 
-    val BIGweatherStateImage = mapOf(
+    fun getSpeedMark() : String {
+        when(unitsOfMeasurement[0]) {
+            's' -> {
+                return resources.getString(R.string.speed_standard)
+            }
+            'm' -> {
+                return resources.getString(R.string.speed_metrics)
+            }
+            'i' -> {
+                return resources.getString(R.string.speed_imperial)
+            }
+        }
+        return ""
+    }
+
+    fun getDistanceMark() : String {
+        when(unitsOfMeasurement[0]) {
+            's' -> {
+                return resources.getString(R.string.distance_standard)
+            }
+            'm' -> {
+                return resources.getString(R.string.distance_metrics)
+            }
+            'i' -> {
+                return resources.getString(R.string.distance_imperial)
+            }
+        }
+        return ""
+    }
+
+    fun getTemperatureMark() : String {
+        when(unitsOfMeasurement[0]) {
+            's' -> {
+               return resources.getString(R.string.temperature_standard)
+            }
+            'm' -> {
+                return resources.getString(R.string.temperature_metrics)
+            }
+            'i' -> {
+                return resources.getString(R.string.temperature_imperial)
+            }
+        }
+        return ""
+    }
+
+    fun getAtmoPressureMark() : String {
+        when(atmoPressureUnits[0]) {
+            'm' -> {
+                return resources.getString(R.string.mmHg)
+            }
+            'h' -> {
+                return resources.getString(R.string.hPa)
+            }
+        }
+        return ""
+    }
+
+    fun getUnitsOfMeasurement() : String {
+        return unitsOfMeasurement
+    }
+
+    fun getAtmoPressureUnits() : String {
+        return atmoPressureUnits
+    }
+
+    private val bigWeatherStateImage = mapOf(
         Pair("Clear", R.drawable.ic_big_clear_day),
         Pair("Clouds", R.drawable.ic_big_cloudy),
         Pair("Mist", R.drawable.ic_big_cloudy),
@@ -489,7 +719,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         Pair("Thunderstorm", R.drawable.ic_big_thunderstorm)
     )
 
-    val SMALLweatherStateImage = mapOf(
+    val smallWeatherStateImage = mapOf(
         Pair("Clear", R.drawable.ic_small_clear_day),
         Pair("Clouds", R.drawable.ic_small_cloudy),
         Pair("Mist", R.drawable.ic_small_cloudy),
@@ -543,7 +773,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         Pair("Thunderstorm", R.color.thunderstorm)
     )
 
-    val whatMoreImportant = mapOf(
+    private val whatMoreImportant = mapOf(
         Pair("Clear", 1),
         Pair("Clouds", 2),
         Pair("Mist", 2),
@@ -561,11 +791,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
         Pair("Thunderstorm", 4)
     )
 
+    override fun onPause() {
+        super.onPause()
 
-    override fun onStop() {
-        super.onStop()
-        if(connectionDialog.isAdded) {
-            connectionDialog.dismissAllowingStateLoss()
+        saveInfo.edit().putString("unitsOfMeasurement", unitsOfMeasurement).apply()
+        saveInfo.edit().putString("language", language).apply()
+        saveInfo.edit().putString("atmoPressureUnits", atmoPressureUnits).apply()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val oldConnectionFragment = supportFragmentManager.findFragmentByTag("No connection dialog")
+        if(oldConnectionFragment != null) {
+            supportFragmentManager.beginTransaction().remove(oldConnectionFragment).commit()
         }
     }
 

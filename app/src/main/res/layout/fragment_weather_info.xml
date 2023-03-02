@@ -9,7 +9,7 @@
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Monday\n15/11/2022"
+        android:text=""
         android:gravity="center"
         android:textSize="18dp"
         android:textStyle="bold"
@@ -45,7 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:text="Atmospheric pressure: "
+        android:text="@string/atmospheric_pressure"
         android:textSize="14dp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -61,7 +61,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:text="Humidity: "
+        android:text="@string/humidity"
         android:textSize="14dp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -76,7 +76,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:text="Cloud cover: "
+        android:text="@string/cloud_cover"
         android:textSize="14dp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -91,7 +91,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:text="Visibility (max 10 km):  "
+        android:text="@string/visibility_max_10_km_6_2_mi"
         android:textSize="14dp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -105,7 +105,7 @@
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Wind speed:"
+        android:text="@string/wind_speed"
         android:textSize="14dp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -139,7 +139,7 @@
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Probability of precipitation:"
+        android:text="@string/probability_of_precipitation"
         android:textSize="14dp"
         android:textStyle="bold"
         android:textColor="@color/black"
