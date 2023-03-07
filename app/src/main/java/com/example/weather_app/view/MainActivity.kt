@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             "ru"
         }
 
-        presenter = Presenter(this)
+        presenter = Presenter(this, BuildConfig.OpenWeatherMap_API_KEY)
         binding.refreshLayout.isRefreshing = true
         setAppLocale()
 
@@ -174,7 +174,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
                 presenter.updateWeather(
                     lat,
                     lon,
-                    BuildConfig.OpenWeatherMap_API_KEY,
                     unitsOfMeasurement,
                     langCode
                 )
@@ -432,8 +431,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
             binding.refreshLayout.isRefreshing = true
 
-            presenter.updateWeather(lat, lon, BuildConfig.OpenWeatherMap_API_KEY,
-                unitsOfMeasurement, langCode)
+            presenter.updateWeather(lat, lon, unitsOfMeasurement, langCode)
         } else {
             Log.w("Warning", "Places: latitude or longitude is null")
         }
@@ -489,8 +487,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
             getFor = false
             getCur = false
 
-            presenter.updateWeather(NEWgeolocation.lat, NEWgeolocation.lon,
-                BuildConfig.OpenWeatherMap_API_KEY, unitsOfMeasurement, langCode)
+            presenter.updateWeather(NEWgeolocation.lat, NEWgeolocation.lon, unitsOfMeasurement, langCode)
         } else {
             startConnectionDialog(1, code)
         }
@@ -622,8 +619,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
                     binding.refreshLayout.isRefreshing = true
 
                     presenter.updateWeather(
-                        lat, lon, BuildConfig.OpenWeatherMap_API_KEY,
-                        unitsOfMeasurement, langCode
+                        lat, lon, unitsOfMeasurement, langCode
                     )
                 } else {
                     Log.w("Warning", "Places: latitude or longitude is null")

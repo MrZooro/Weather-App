@@ -14,10 +14,10 @@ import java.time.MonthDay
 import java.util.*
 import kotlin.collections.List
 
-class Presenter(view: UpdateView) {
+class Presenter(view: UpdateView, weatherAPIKey: String) {
     private var currentWeather : CurrentWeather? = null
-    private lateinit var weatherAPIService: WeatherAPIService
-    private lateinit var GeolocationService: ipGeolocationService
+    private val weatherAPIService: WeatherAPIService = WeatherAPIService(this, weatherAPIKey)
+    private val geolocationService: ipGeolocationService = ipGeolocationService(this)
     private var geolocation: ipGeolocation? = null
     private var viewForUpdate: UpdateView = view
 
@@ -27,9 +27,7 @@ class Presenter(view: UpdateView) {
     private lateinit var forecastWeatherByDay: MutableList<List<ForecastWeatherItem>>
     private lateinit var forecastCurWeather: List<ForecastWeatherItem>
 
-    fun updateWeather(lat : Double, lon : Double, apiKey : String, units : String, lang: String) {
-        weatherAPIService = WeatherAPIService(this, apiKey)
-
+    fun updateWeather(lat : Double, lon : Double, units : String, lang: String) {
         weatherAPIService.getCurrentWeather(lat, lon, units, lang)
         weatherAPIService.getForecastWeather(lat, lon, units)
     }
@@ -90,8 +88,7 @@ class Presenter(view: UpdateView) {
     }
 
     fun updateGeolocation(lang: String) {
-        GeolocationService = ipGeolocationService(this)
-        GeolocationService.getGeolocation(lang)
+        geolocationService.getGeolocation(lang)
     }
 
     fun sendGeolocation(data: ipGeolocation?, code: Int) {

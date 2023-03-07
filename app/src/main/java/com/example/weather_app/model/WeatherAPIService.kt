@@ -1,6 +1,7 @@
 package com.example.weather_app.model
 
 import android.util.Log
+import com.example.weather_app.BuildConfig
 import com.example.weather_app.model.current_weather.CurrentWeather
 import com.example.weather_app.model.forecast_weather.ForecastWeather
 import com.example.weather_app.presenter.Presenter
@@ -10,10 +11,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class WeatherAPIService(presenter: Presenter, apiKey : String) {
-    private var URLcurWeather : String = "https://api.openweathermap.org/data/2.5/weather?"
-    private var URLforWeather : String = "https://api.openweathermap.org/data/2.5/forecast?"
-    private val MainApiKey : String = apiKey
-    private val MainPresener = presenter
+    private val baseURLcurWeather : String = "https://api.openweathermap.org/data/2.5/weather?"
+    private val baseURLforWeather : String = "https://api.openweathermap.org/data/2.5/forecast?"
+    private val mainApiKey : String = apiKey
+    private val mainPresenter = presenter
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.openweathermap.org/data/2.5/")
         .addConverterFactory(GsonConverterFactory.create())
@@ -21,10 +22,9 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
         .create(WeatherAPI::class.java)
 
     fun getCurrentWeather(lat : Double, lon : Double, units: String, lang: String) {
-        URLcurWeather = "${URLcurWeather}lat=$lat&lon=$lon&lang=$lang&appid=$MainApiKey&units=$units"
+        val urlCurWeather = "${baseURLcurWeather}lat=$lat&lon=$lon&lang=$lang&appid=$mainApiKey&units=$units"
 
-
-        val call = retrofit.getDataCurrentWeather(URLcurWeather)
+        val call = retrofit.getDataCurrentWeather(urlCurWeather)
         call.enqueue(object : Callback<CurrentWeather>{
             override fun onResponse(
                 call: retrofit2.Call<CurrentWeather>,
@@ -48,13 +48,13 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
     }
 
     fun sendCurrentWeather(data : CurrentWeather?, code : Int) {
-        MainPresener.setCurrentWeather(data, code)
+        mainPresenter.setCurrentWeather(data, code)
     }
 
     fun getForecastWeather(lat: Double, lon: Double, units: String) {
-        URLforWeather = "${URLforWeather}lat=$lat&lon=$lon&appid=$MainApiKey&units=$units"
+        val urlCurWeather = "${baseURLforWeather}lat=$lat&lon=$lon&appid=$mainApiKey&units=$units"
 
-        val call = retrofit.getDataForecastWeather(URLforWeather)
+        val call = retrofit.getDataForecastWeather(urlCurWeather)
         call.enqueue(object : Callback<ForecastWeather>{
             override fun onResponse(
                 call: retrofit2.Call<ForecastWeather>,
@@ -78,7 +78,7 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
     }
 
     fun sendForecastWeather(data : ForecastWeather?, code: Int) {
-        MainPresener.setForecastWeather(data, code)
+        mainPresenter.setForecastWeather(data, code)
     }
 
 }
