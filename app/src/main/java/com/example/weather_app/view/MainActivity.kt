@@ -3,6 +3,7 @@ package com.example.weather_app.view
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.transition.AutoTransition
@@ -45,8 +46,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     private var city : Place? = null
     private lateinit var date : Calendar
 
-    private val ruLocale = Locale("ru")
-    private val enLocale = Locale("en")
+    val ruLocale = Locale("ru")
+    val enLocale = Locale("en")
     private var dateFormat : SimpleDateFormat = SimpleDateFormat("EEEE\ndd/MM/yyyy", Locale.US)
 
     var startBSDF = false
@@ -54,9 +55,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
     private var settingsDialogOpen = false
     private var connectionDialogOpen = false
 
-    private var unitsOfMeasurement = "standard"
-    private var language = "English"
-    private var langCode = "en"
+    private var unitsOfMeasurement = "metric"
+    private var language = "Russian"
+    var langCode = "en"
     private var atmoPressureUnits = "mmHg"
 
     private lateinit var saveInfo: SharedPreferences
@@ -68,11 +69,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, UpdateView,
 
         saveInfo = getSharedPreferences("save_info", MODE_PRIVATE)
 
-        val tempUnits = saveInfo.getString("unitsOfMeasurement", "standard")
+        val tempUnits = saveInfo.getString("unitsOfMeasurement", "metric")
         if(tempUnits != null) {
             unitsOfMeasurement = tempUnits
         }
-        val tempLanguage = saveInfo.getString("language", "English")
+        val tempLanguage = saveInfo.getString("language", "Russian")
         if(tempLanguage != null) {
             language = tempLanguage
         }

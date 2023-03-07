@@ -27,7 +27,7 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
                           private val currentWeather: CurrentWeather?,
                           private val context : MainActivity): BottomSheetDialogFragment() {
 
-    private val dateFormat : SimpleDateFormat = SimpleDateFormat("EEEE\ndd/MM/yyyy", Locale.US)
+    private var dateFormat : SimpleDateFormat = SimpleDateFormat("EEEE\ndd/MM/yyyy", Locale.US)
     private val hoursMinutes : SimpleDateFormat = SimpleDateFormat("HH:mm", Locale.US)
 
     override fun onCreateView(
@@ -61,6 +61,12 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
         } else {
             timeList = createTimeList()
             newWeatherList = weatherList
+        }
+
+        dateFormat = if(context.langCode[0] == 'e') {
+            SimpleDateFormat("EEEE\ndd/MM/yyyy", context.enLocale)
+        } else {
+            SimpleDateFormat("EEEE\ndd/MM/yyyy", context.ruLocale)
         }
 
 
