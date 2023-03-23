@@ -29,7 +29,7 @@ class Presenter(view: UpdateView, weatherAPIKey: String) {
 
     fun updateWeather(lat : Double, lon : Double, units : String, lang: String) {
         weatherAPIService.getCurrentWeather(lat, lon, units, lang)
-        weatherAPIService.getForecastWeather(lat, lon, units)
+        weatherAPIService.getForecastWeather(lat, lon, units, lang)
     }
 
     fun setCurrentWeather(NEWcurrentWeather: CurrentWeather?, code : Int){

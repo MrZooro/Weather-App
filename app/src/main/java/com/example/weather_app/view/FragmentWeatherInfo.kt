@@ -147,9 +147,9 @@ class FragmentWeatherInfo(private val weatherList : List<ForecastWeatherItem>,
     private fun addBigWeatherCards() {
         val ds : DisplayMetrics = resources.displayMetrics
         val layoutHeight = 140 * ds.density
-        val layoutWidth = 88 * ds.density
+        val layoutWidth = 104 * ds.density
 
-        val defaultMargin = 96 * ds.density
+        val defaultMargin = 112 * ds.density
         var layoutMargin = 18 * ds.density
 
         for (i in newWeatherList.indices) {

@@ -51,8 +51,8 @@ class WeatherAPIService(presenter: Presenter, apiKey : String) {
         mainPresenter.setCurrentWeather(data, code)
     }
 
-    fun getForecastWeather(lat: Double, lon: Double, units: String) {
-        val urlCurWeather = "${baseURLforWeather}lat=$lat&lon=$lon&appid=$mainApiKey&units=$units"
+    fun getForecastWeather(lat: Double, lon: Double, units: String, lang: String) {
+        val urlCurWeather = "${baseURLforWeather}lat=$lat&lon=$lon&lang=$lang&appid=$mainApiKey&units=$units"
 
         val call = retrofit.getDataForecastWeather(urlCurWeather)
         call.enqueue(object : Callback<ForecastWeather>{
