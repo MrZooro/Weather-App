@@ -2,6 +2,14 @@
 
 Это простое погодное приложение.
 
+### Скриншоты:
+<p align="left">
+  <img src="https://github.com/LittleDevo4ka/images/raw/main/Weather-app/1.png" width="150" />
+  <img src="https://github.com/LittleDevo4ka/images/raw/main/Weather-app/2.png" width="150" />
+  <img src="https://github.com/LittleDevo4ka/images/raw/main/Weather-app/3.png" width="150" />
+  <img src="https://github.com/LittleDevo4ka/images/raw/main/Weather-app/4.png" width="150" />
+</p>
+
 ### Стэк:  
 Языки: Kotlin, XML  
 Платформа: Android (10 - 13)  
@@ -15,11 +23,3 @@ Model: Retrofit, data classes
 используется для облегчения пользователю поиска населённого пункта, погоду в котором ему необходимо узнать, а так же для того, чтобы
 получить точные координаты населённого пункта, чтобы прогноз погоды был точнее),
 <a href="https://ip-api.com/">IP Geolocation</a> (получение примерного местоположения пользователя с помощью IP-адреса).
-
-### Скриншоты:
-<p align="left">
-  <img src="https://github.com/LittleDevo4ka/images/raw/main/Weather-app/1.png" width="150" />
-  <img src="https://github.com/LittleDevo4ka/images/raw/main/Weather-app/2.png" width="150" />
-  <img src="https://github.com/LittleDevo4ka/images/raw/main/Weather-app/3.png" width="150" />
-  <img src="https://github.com/LittleDevo4ka/images/raw/main/Weather-app/4.png" width="150" />
-</p>
