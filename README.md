@@ -15,7 +15,7 @@
 Платформа: Android (10 - 13)  
 Архитектура: MVP  
 View: ViewBinding, DialogFragment, BottomSheetDialogFragment  
-Model: Retrofit, data classes 
+ViewModel, Model: Retrofit, data classes 
 
 ### Внешние API:  
 <a href="https://openweathermap.org/">OpenWeather</a> (Прогноз погоды),
