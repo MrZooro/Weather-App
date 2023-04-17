@@ -6,7 +6,7 @@
 Языки: Kotlin, XML  
 Платформа: Android (10 - 13)  
 Архитектура: MVP  
-View: ViewBinding, DialogFragment, BottomSheetDialogFragment  
+View: ViewBinding, DialogFragment, BottomSheetDialogFragment, SwipeRefreshLayout  
 ViewModel, Model: Retrofit, data classes 
 
 ### Внешние API:  
