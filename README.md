@@ -18,8 +18,8 @@ ViewModel, Model: Retrofit, data classes
 
 ### Скриншоты:
 <p align="left">
-  <img src="https://user-images.githubusercontent.com/71511704/229791814-1853a244-48e0-4ec3-8e10-00d6b302528f.png" width="250" />
-  <img src="https://user-images.githubusercontent.com/71511704/229792014-b5a2ac24-b9ba-4f5d-837e-7c72b4ba0eaf.png" width="250" />
-  <img src="https://user-images.githubusercontent.com/71511704/229792200-6c1bc90e-07e9-4369-8abc-4348efe2ae98.png" width="250" />
-  <img src="https://user-images.githubusercontent.com/71511704/229792490-76fcb58b-fd53-4358-8be8-c1bd3fac25d2.png" width="250" />
+  <img src="https://user-images.githubusercontent.com/71511704/229791814-1853a244-48e0-4ec3-8e10-00d6b302528f.png" width="245" />
+  <img src="https://user-images.githubusercontent.com/71511704/229792014-b5a2ac24-b9ba-4f5d-837e-7c72b4ba0eaf.png" width="245" />
+  <img src="https://user-images.githubusercontent.com/71511704/229792200-6c1bc90e-07e9-4369-8abc-4348efe2ae98.png" width="245" />
+  <img src="https://user-images.githubusercontent.com/71511704/229792490-76fcb58b-fd53-4358-8be8-c1bd3fac25d2.png" width="245" />
 </p>
